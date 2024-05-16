@@ -14,7 +14,7 @@ enum TokenType{
   LEFT_BRACE; RIGHT_BRACE // { }
 
   //Operator
-  PLUS; MINUS; STAR; SLASH; PERCENT // + - * / %
+  PLUS; MINUS; MUL; DIV; MOD // + - * / %
   ASSIGN // =
   EQUAL; NOT_EQUAL // == !=
   LESS; LESS_EQUAL // < <=
@@ -63,7 +63,7 @@ fn getTokenStr(self:TokenType)->String{
   LEFT_BRACE => "LEFT_BRACE"; RIGHT_BRACE => "RIGHT_BRACE" // { }
 
   //Operator
-  PLUS => "PLUS"; MINUS => "MINUS"; STAR => "STAR"; SLASH => "SLASH"; PERCENT => "PERCENT" // + - * / %
+  PLUS => "PLUS"; MINUS => "MINUS"; MUL => "MUL"; DIV => "DIV"; MOD => "MOD" // + - * / %
   ASSIGN => "ASSIGN" // =
   EQUAL => "EQUAL"; NOT_EQUAL => "NOT_EQUAL" // == !=
   LESS => "LESS"; LESS_EQUAL => "LESS_EQUAL" // < <=

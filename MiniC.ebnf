@@ -1,0 +1,16 @@
+# Mini C EBNF Grammar 2024
+
+# Program
+<Translation_Unit> ::= {<Statement>} CODE_EOF
+
+# Statement
+<Statement> ::= <Print_Statement>
+<Print_Statement> ::= PRINT <Expression> ";"
+
+# Expression
+<Expression> ::= <PlusMinus_Expression>
+
+<PlusMinus_Expression> ::= <MulDiv_Expression>{("+" | "-")<MulDiv_Expression>}
+<MulDiv_Expression> ::= <Unary_Expression>{("*" | "/" | "%")<Unary_Expression>}
+<Unary_Expression> ::= ["-"]<Primary_Expression> 
+<Primary_Expression> ::= "("<Expression>")" | CONSTANT_INT

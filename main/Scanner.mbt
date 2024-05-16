@@ -40,8 +40,8 @@ fn Scanner::scan(self:Scanner)->@vec.Vec[Token]{
       //Operator
       '+' => addToken(PLUS)
       '-' => addToken(MINUS)
-      '*' => addToken(STAR)
-      '%' => addToken(PERCENT)
+      '*' => addToken(MUL)
+      '%' => addToken(MOD)
       '=' => addToken(if self.mattch('='){EQUAL}        else{ASSIGN})
       '!' => addToken(if self.mattch('='){NOT_EQUAL}    else{NOT})
       '<' => addToken(if self.mattch('='){LESS_EQUAL}   else{LESS})
@@ -59,7 +59,7 @@ fn Scanner::scan(self:Scanner)->@vec.Vec[Token]{
               if self.isAtEnd(){self.scanError("Incomplete multi-line comment")}
               else {self.current+=1}
              }
-             else {addToken(SLASH)}
+             else {addToken(DIV)}
 
       //Blank
       ' '|'\r'|'\t' => continue
@@ -70,7 +70,7 @@ fn Scanner::scan(self:Scanner)->@vec.Vec[Token]{
       //Identifier and Keyword
            else if isAlphaUnderline(c){addToken(self.scanIdentifierKeyword())}
       //Error
-           else {self.scanError("Unexpected character")}
+           else {self.scanError("Unexpected character '"+c.to_string()+"'")}
 
     }
   }
@@ -154,20 +154,13 @@ fn isDigitAlphaUnderline(c:Char)->Bool{
 
 
 
-fn Scanner::scanError(self:Scanner,message:String)->Unit{
-  self.is_error=true
-  error(E_Scanner,self.line,message)
-}
-
-
-
 fn tokensPrint(tokens:@vec.Vec[Token])->Unit{
   println("Line\tLexeme\tTokenType\tLiteral")
   tokens.iter(
     fn (token){
       print(token.line.to_string()+"\t")
       print(token.lexeme+"\t")
-      println(getTokenStr(token.t_type))
+      println(token.t_type.getTokenStr())
     }
   )
 }

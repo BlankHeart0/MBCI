@@ -11,3 +11,8 @@ fn error(e_type : ErrorType, line : Int, message : String) -> Unit {
   print("Line " + line.to_string())
   println(": " + message)
 }
+
+fn Scanner::scanError(self:Scanner,message:String)->Unit{
+  self.is_error=true
+  error(E_Scanner,self.line,message)
+}
