@@ -1,0 +1,17 @@
+"filename", "language", "JSON", "Moonbit", "BNF", "Markdown", "comment", "blank", "total"
+"/home/blankheart0/Interpreter/MBCI/MiniC.ebnf", "BNF", 0, 0, 8, 0, 4, 4, 16
+"/home/blankheart0/Interpreter/MBCI/README.md", "Markdown", 0, 0, 0, 1, 0, 0, 1
+"/home/blankheart0/Interpreter/MBCI/main/AST.mbt", "Moonbit", 0, 30, 0, 0, 3, 9, 42
+"/home/blankheart0/Interpreter/MBCI/main/Debug.mbt", "Moonbit", 0, 4, 0, 0, 0, 1, 5
+"/home/blankheart0/Interpreter/MBCI/main/ErrorHandler.mbt", "Moonbit", 0, 20, 0, 0, 0, 3, 23
+"/home/blankheart0/Interpreter/MBCI/main/Interpreter.mbt", "Moonbit", 0, 11, 0, 0, 0, 2, 13
+"/home/blankheart0/Interpreter/MBCI/main/Parser.mbt", "Moonbit", 0, 55, 0, 0, 3, 16, 74
+"/home/blankheart0/Interpreter/MBCI/main/Scanner.mbt", "Moonbit", 0, 122, 0, 0, 9, 31, 162
+"/home/blankheart0/Interpreter/MBCI/main/Token.mbt", "Moonbit", 0, 58, 0, 0, 10, 13, 81
+"/home/blankheart0/Interpreter/MBCI/main/moon.pkg.json", "JSON", 6, 0, 0, 0, 0, 0, 6
+"/home/blankheart0/Interpreter/MBCI/moon.mod.json", "JSON", 9, 0, 0, 0, 0, 0, 9
+"/home/blankheart0/Interpreter/MBCI/test/expression.mbt", "Moonbit", 0, 4, 0, 0, 0, 2, 6
+"/home/blankheart0/Interpreter/MBCI/test/moon.pkg.json", "JSON", 1, 0, 0, 0, 0, 0, 1
+"/home/blankheart0/Interpreter/MBCI/test/scanner.mbt", "Moonbit", 0, 25, 0, 0, 0, 0, 25
+"/home/blankheart0/Interpreter/MBCI/test/test.mbt", "Moonbit", 0, 0, 0, 0, 5, 1, 6
+"Total", "-", 16, 329, 8, 1, 34, 82, 470

@@ -1,6 +1,6 @@
 # Mini C EBNF Grammar 2024
 
-# Program
+# Translation Unit
 <Translation_Unit> ::= {<Statement>} CODE_EOF
 
 # Statement

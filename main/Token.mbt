@@ -79,3 +79,44 @@ fn getTokenStr(self:TokenType)->String{
   CODE_EOF => "CODE_EOF"
   }
 }
+
+fn isSameTokenType(token1type:TokenType,token2type:TokenType)->Bool{
+  match token1type{
+    INT => match token2type{INT=>true;_=>false}
+    PRINT => match token2type{PRINT=>true;_=>false}
+    IF => match token2type{IF=>true;_=>false}
+    ELSE => match token2type{ELSE=>true;_=>false}
+    WHILE => match token2type{WHILE=>true;_=>false}
+    DO => match token2type{DO=>true;_=>false}
+    FOR => match token2type{FOR=>true;_=>false}
+    CONTINUE => match token2type{CONTINUE=>true;_=>false}
+    BREAK => match token2type{BREAK=>true;_=>false}
+    RETURN => match token2type{RETURN=>true;_=>false}
+    SEMICOLON => match token2type{SEMICOLON=>true;_=>false}
+    COMMA => match token2type{COMMA=>true;_=>false}
+    LEFT_PAREN => match token2type{LEFT_PAREN=>true;_=>false}
+    RIGHT_PAREN => match token2type{RIGHT_PAREN=>true;_=>false}
+    LEFT_SQUARE => match token2type{LEFT_SQUARE=>true;_=>false}
+    RIGHT_SQUARE => match token2type{RIGHT_SQUARE=>true;_=>false}
+    LEFT_BRACE => match token2type{LEFT_BRACE=>true;_=>false}
+    RIGHT_BRACE => match token2type{RIGHT_BRACE=>true;_=>false}
+    PLUS => match token2type{PLUS=>true;_=>false}
+    MINUS => match token2type{MINUS=>true;_=>false}
+    MUL => match token2type{MUL=>true;_=>false}
+    DIV => match token2type{DIV=>true;_=>false}
+    MOD => match token2type{MOD=>true;_=>false}
+    ASSIGN => match token2type{ASSIGN=>true;_=>false}
+    EQUAL => match token2type{EQUAL=>true;_=>false}
+    NOT_EQUAL => match token2type{NOT_EQUAL=>true;_=>false}
+    LESS => match token2type{LESS=>true;_=>false}
+    LESS_EQUAL => match token2type{LESS_EQUAL=>true;_=>false}
+    GREATER => match token2type{GREATER=>true;_=>false}
+    GREATER_EQUAL => match token2type{GREATER_EQUAL=>true;_=>false}
+    NOT => match token2type{NOT=>true;_=>false}
+    AND => match token2type{AND=>true;_=>false}
+    OR => match token2type{OR=>true;_=>false}
+    CONSTANT_INT(_) => match token2type{CONSTANT_INT(_)=>true;_=>false}
+    IDENTIFIER => match token2type{IDENTIFIER=>true;_=>false}
+    CODE_EOF => match token2type{CODE_EOF=>true;_=>false}
+  }
+}

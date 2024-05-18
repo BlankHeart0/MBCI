@@ -9,7 +9,7 @@ pub let scanner_t1 =
   #|  if(n<=0)return 0;
   #|  else if(n==1||n==2)return 1;
   #|
-  #|  return fib(n-1)+fib(n-2); //Recursive
+  #|  return fib(n-1)+fib(n.-2); //Recursive
   #|}
   #|
   #|int main()

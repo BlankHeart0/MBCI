@@ -7,7 +7,7 @@ struct Scanner {
 }
 
 fn Scanner::scan(self:Scanner)->@vec.Vec[Token]{
-  let tokens:@vec.Vec[Token]=@vec.Vec::new();
+  let tokens:@vec.Vec[Token]=@vec.Vec::new()
   
   fn addToken(t_type:TokenType){
     let token:Token={
@@ -107,7 +107,7 @@ fn Scanner::scanIdentifierKeyword(self:Scanner)->TokenType{
 
 // tool function
 fn Scanner::isAtEnd(self:Scanner)->Bool{
-  if self.current>=self.source.length() {true} 
+  if self.is_error||self.current>=self.source.length() {true} 
   else {false}
 }
 
@@ -132,10 +132,6 @@ fn Scanner::mattch(self:Scanner,expected:Char)->Bool{
 //before you use peek,you should judge array index by yourself
 fn Scanner::peek1(self:Scanner)->Char{
   self.source[self.current]
-}
-
-fn Scanner::peek2(self:Scanner)->Char{
-  self.source[self.current+1]
 }
 
 
