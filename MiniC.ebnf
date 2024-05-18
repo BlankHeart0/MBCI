@@ -1,11 +1,17 @@
 # Mini C EBNF Grammar 2024
 
 # Translation Unit
-<Translation_Unit> ::= {<Statement>} CODE_EOF
+<Translation_Unit> ::= {<Function_Definition>} CODE_EOF
+
+# Definition
+<Function_Definition> ::= (VOID|INT) IDENTIFIER "(" ")" <Compound_Statement>
 
 # Statement
-<Statement> ::= <Print_Statement>
+<Statement> ::= <Compound_Statement> | <Print_Statement> | <Expression_Statement>
+<Compound_Statement> ::= "{"{<Statement>}"}"
+
 <Print_Statement> ::= PRINT <Expression> ";"
+<Expression_Statement> ::= <Expression> ";"
 
 # Expression
 <Expression> ::= <PlusMinus_Expression>

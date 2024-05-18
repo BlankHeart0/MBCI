@@ -1,4 +1,4 @@
-let error_number:Int = -1073741829
+//let error_number:Int = -1073741829
 
 enum ErrorType {
   E_Scanner
@@ -28,6 +28,6 @@ fn Parser::parseError(self:Parser,message:String)->Unit{
   }
 }
 
-fn excuteError(message:String)->Unit{
-  println("Excute Error: "+message)
-}
+// fn excuteError(message:String)->Unit{
+//   println("Excute Error: "+message)
+// }

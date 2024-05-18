@@ -1,6 +1,6 @@
 enum TokenType{
   //Keyword
-  INT
+  INT; VOID
   PRINT
   IF; ELSE
   WHILE; DO; FOR
@@ -32,7 +32,7 @@ enum TokenType{
 
 let keywordMap:@hashmap.HashMap[String,TokenType]=
   @hashmap.HashMap::[
-    ("int",INT),
+    ("int",INT),("void",VOID),
     ("print",PRINT),
     ("if",IF),("else",ELSE),
     ("while",WHILE),("do",DO),("for",FOR),
@@ -49,7 +49,7 @@ struct Token {
 fn getTokenStr(self:TokenType)->String{
   match self{
   //Keyword
-  INT => "INT"
+  INT => "INT"; VOID=>"VOID"
   PRINT => "PRINT"
   IF => "IF"; ELSE => "ELSE"
   WHILE => "WHILE"; DO => "DO"; FOR => "FOR"
@@ -83,6 +83,7 @@ fn getTokenStr(self:TokenType)->String{
 fn isSameTokenType(token1type:TokenType,token2type:TokenType)->Bool{
   match token1type{
     INT => match token2type{INT=>true;_=>false}
+    VOID => match token2type{VOID=>true;_=>false}
     PRINT => match token2type{PRINT=>true;_=>false}
     IF => match token2type{IF=>true;_=>false}
     ELSE => match token2type{ELSE=>true;_=>false}

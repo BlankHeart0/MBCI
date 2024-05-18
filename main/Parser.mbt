@@ -8,112 +8,170 @@ struct Parser {
 
 
 // Translation Unit
-fn Parser::parseTranslationUnit(self:Parser)->AST{
+fn Parser::parseTranslationUnit(self:Parser)->Result[AST,Unit]{
   whoAmI("parseTranslationUnit")
 
-  let statements=@vec.Vec::new()
+  let function_definitions=@vec.Vec::new()
   
-  while not(self.isAtEnd()){
-    statements.push(self.parseStatement())
+  while not(self.isAtEnd()||self.isAtEnd()){
+    function_definitions.push(self.parseFunctionDefinition()?)
   }
 
-  TranslationUnitAST(statements)
+  Ok(TranslationUnitAST(function_definitions))
+}
+
+
+
+// Definition
+fn Parser::parseFunctionDefinition(self:Parser)->Result[AST,Unit]{
+  whoAmI("parseFunctionDefinition")
+
+  if self.mattch(VOID)||self.mattch(INT){
+    let ret_type=self.consumed()
+    
+    if self.mattch(IDENTIFIER){
+      let function_name=self.consumed()
+
+      if self.mattch(LEFT_PAREN){
+        if self.mattch(RIGHT_PAREN){
+          let compound_statement=self.parseCompoundStatement()?
+
+          Ok(FunctionDefinitionAST(ret_type,function_name,compound_statement))
+        }
+        else {self.parseError("Right paren ')' loss");Err(())}
+      }
+      else {self.parseError("Left paren '(' loss");Err(())}
+    }
+    else {self.parseError("Function name loss");Err(())}
+  }
+  else {self.parseError("Function return type loss");Err(())}
 }
 
 
 
 // Statement
-fn Parser::parseStatement(self:Parser)->AST{
+fn Parser::parseStatement(self:Parser)->Result[AST,Unit]{
   whoAmI("parseStatement")
 
-  let x_statement=self.parsePrintStatement()
+  let x_statement=match self.consuming().t_type{
+    LEFT_BRACE => self.parseCompoundStatement()?
+    PRINT => self.parsePrintStatement()?
+    _ => self.parseExpressionStatement()?
+  }
 
-  StatementAST(x_statement)
+  Ok(StatementAST(x_statement))
 }
 
-fn Parser::parsePrintStatement(self:Parser)->AST{
+fn Parser::parseCompoundStatement(self:Parser)->Result[AST,Unit]{
+  whoAmI("parseCompoundStatement")
+
+  let statements=@vec.Vec::new()
+  if self.mattch(LEFT_BRACE){
+    while not(self.mattch(RIGHT_BRACE)){
+      statements.push(self.parseStatement()?)
+    }
+
+    match self.consumed().t_type{
+      RIGHT_BRACE => Ok(CompoundStatementAST(statements))
+      _ => {self.parseError("Right brace '}' loss");Err(())}
+    } 
+  }
+  else {self.parseError("Left brace '{' loss");Err(())}
+}
+
+fn Parser::parsePrintStatement(self:Parser)->Result[AST,Unit]{
   whoAmI("parsePrintStatement")
 
-  if not(self.mattch(PRINT)){self.parseError("Keyword 'print' loss")}
-  let expression=self.parseExpression()
-  self.mattchSemicolon()
+  if self.mattch(PRINT){
+    let expression=self.parseExpression()?
+    self.mattchSemicolon()
 
-  PrintStatementAST(expression)
+    Ok(PrintStatementAST(expression))
+  }
+  else {self.parseError("Keyword 'print' loss");Err(())}
 }
 
+fn Parser::parseExpressionStatement(self:Parser)->Result[AST,Unit]{
+  whoAmI("parseExpressionStatement")
+
+  let expression=self.parseExpression()?
+  self.mattchSemicolon()
+
+  Ok(ExpressionStatementAST(expression))
+}
 
 
 // Expression
-fn Parser::parseExpression(self:Parser)->AST{
+fn Parser::parseExpression(self:Parser)->Result[AST,Unit]{
   whoAmI("parseExpression")
 
-  let plusminus_expression=self.parsePlusMinusExpression()
+  let plusminus_expression=self.parsePlusMinusExpression()?
 
-  ExpressionAST(plusminus_expression)
+  Ok(ExpressionAST(plusminus_expression))
 }
 
-fn Parser::parsePlusMinusExpression(self:Parser)->AST{
+fn Parser::parsePlusMinusExpression(self:Parser)->Result[AST,Unit]{
   whoAmI("parsePlusMinusExpression")
 
   let muldiv_expressions=@vec.Vec::new()
   let infix_operators=@vec.Vec::new()
   
-  muldiv_expressions.push(self.parseMulDiveExpression())
+  muldiv_expressions.push(self.parseMulDiveExpression()?)
   while self.mattch(PLUS)||self.mattch(MINUS){
     infix_operators.push(self.consumed())
-    muldiv_expressions.push(self.parseMulDiveExpression())
+    muldiv_expressions.push(self.parseMulDiveExpression()?)
   }
 
-  PlusMinusExpressionAST(muldiv_expressions,infix_operators)
+  Ok(PlusMinusExpressionAST(muldiv_expressions,infix_operators))
 }
 
-fn Parser::parseMulDiveExpression(self:Parser)->AST{
+fn Parser::parseMulDiveExpression(self:Parser)->Result[AST,Unit]{
   whoAmI("parseMulDiveExpression")
 
   let unary_expressions=@vec.Vec::new()
   let infix_operators=@vec.Vec::new()
 
-  unary_expressions.push(self.parseUnaryExpression())
+  unary_expressions.push(self.parseUnaryExpression()?)
   while self.mattch(MUL)||self.mattch(DIV)||self.mattch(MOD){
     infix_operators.push(self.consumed())
-    unary_expressions.push(self.parseUnaryExpression())
+    unary_expressions.push(self.parseUnaryExpression()?)
   }
 
-  MulDiveExpressionAST(unary_expressions,infix_operators)
+  Ok(MulDiveExpressionAST(unary_expressions,infix_operators))
 }
 
-fn Parser::parseUnaryExpression(self:Parser)->AST{
+fn Parser::parseUnaryExpression(self:Parser)->Result[AST,Unit]{
   whoAmI("parseUnaryExpression")
 
   let prefix_operator:Option[Token]=
     if self.mattch(MINUS) {Some(self.consumed())}
     else {None}
   
-  let primary_expression=self.parsePrimaryExpression()
+  let primary_expression=self.parsePrimaryExpression()?
 
-  UnaryExpressionAST(prefix_operator,primary_expression)
+  Ok(UnaryExpressionAST(prefix_operator,primary_expression))
 }
 
-fn Parser::parsePrimaryExpression(self:Parser)->AST{
+fn Parser::parsePrimaryExpression(self:Parser)->Result[AST,Unit]{
   whoAmI("parsePrimaryExpression")
 
   // "("<Expression>")"
   if self.mattch(LEFT_PAREN){
-    let expression=self.parseExpression()
-    if not(self.mattch(RIGHT_PAREN)){self.parseError("Right paren ')' loss")}
-    
-    PrimaryExpressionAST(Some(expression),None)
+    let expression=self.parseExpression()?
+
+    if self.mattch(RIGHT_PAREN){Ok(PrimaryExpressionAST(Some(expression),None))}
+    else {self.parseError("Right paren ')' loss");Err(())}
   }
   // CONSTANT_INT
   else {
     match self.consuming().t_type{
       CONSTANT_INT(value_int) => {
         self.consume()
-        PrimaryExpressionAST(None,Some(value_int))
+        Ok(PrimaryExpressionAST(None,Some(value_int)))
       }
       _ => {
         self.parseError("Primary expression loss")
-        PrimaryExpressionAST(None,None)
+        Err(())
       }
     }
   }
@@ -124,7 +182,7 @@ fn Parser::parsePrimaryExpression(self:Parser)->AST{
 // tool function
 fn Parser::isAtEnd(self:Parser)->Bool{
   if not(self.is_error){
-    match self.tokens[self.current].t_type{
+    match self.consuming().t_type{
       CODE_EOF => true
       _ => false
     }
