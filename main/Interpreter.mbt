@@ -23,7 +23,11 @@ fn interpret(source:String)->Unit{
   }
   let ast=parser.parseTranslationUnit()
   if parser.is_error {return}
-  else {println("---- Parse Success! ----")}
+
+  match ast {
+    Ok(ast) => astPrint(ast,0)
+    Err(_) => println("----- Parse Failed! -----")
+  }
 }
 
 fn main {
