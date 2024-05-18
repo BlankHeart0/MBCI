@@ -1,3 +1,5 @@
+let error_number:Int = -1073741829
+
 enum ErrorType {
   E_Scanner
   E_Parser
@@ -24,4 +26,8 @@ fn Parser::parseError(self:Parser,message:String)->Unit{
     self.is_error=true
     error(E_Parser,self.line,message)
   }
+}
+
+fn excuteError(message:String)->Unit{
+  println("Excute Error: "+message)
 }

@@ -21,13 +21,13 @@ fn interpret(source:String)->Unit{
     line:1,
     is_error:false
   }
-  let ast=parser.parseTranslationUnitAST()
+  let ast=parser.parseTranslationUnit()
   if parser.is_error {return}
-  else {println("---- Parse Success! ----")}
+  else {println("---- Parse Success! ----");ast.excuteTranslationUnit()}
 }
 
 fn main {
   interpret(@test.expression_t1)
   interpret(@test.expression_t2)
-
+  interpret(@test.expression_t3)
 }
