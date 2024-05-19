@@ -13,6 +13,10 @@ struct VariableTable {
   mut table:@vec.Vec[@hashmap.HashMap[String,Variable]]
 }
 
+fn VariableTable::new()->VariableTable{
+  {table:@vec.Vec::new()}
+}
+
 fn VariableTable::enterScope(self:VariableTable)->Unit{
   self.table.push(@hashmap.HashMap::new())
 }
@@ -78,6 +82,10 @@ struct Function {
 
 struct FunctionTable {
   mut table:@hashmap.HashMap[String,Function]
+}
+
+fn FunctionTable::new()->FunctionTable{
+  {table:@hashmap.HashMap::new()}
 }
 
 fn FunctionTable::add(self:FunctionTable,function:Function)->Bool{

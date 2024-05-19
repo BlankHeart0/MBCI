@@ -12,7 +12,7 @@ fn interpret(source:String)->Unit{
   }
   let tokens=scanner.scan()
   if scanner.is_error {return}
-  tokensPrint(tokens)
+  tokensPrint(tokens) // print tokens
 
   //Parse
   let parser:Parser = {
@@ -25,8 +25,20 @@ fn interpret(source:String)->Unit{
   if parser.is_error {return}
 
   match ast {
-    Ok(ast) => astPrint(ast,0)
-    Err(_) => println("----- Parse Failed! -----")
+    Ok(ast) => {
+      astPrint(ast,0) // print ast
+      
+      //Excute
+      let excuter:Excuter={
+        ast:ast,
+        functable:FunctionTable::new(),
+        line:0,
+        is_error:false
+      }
+      excuter.excute()
+
+    }
+    Err(_) => ()
   }
 }
 

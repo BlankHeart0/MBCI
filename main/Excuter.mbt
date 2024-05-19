@@ -1,126 +1,196 @@
 struct Excuter {
   ast:AST
+  functable:FunctionTable
   mut line:Int
   mut is_error:Bool
 }
 
 
-// // Translation Unit
-// fn AST::excuteTranslationUnit(self:AST)->Unit{
-//   match self {
-//     TranslationUnitAST(statements) => 
-//       statements.iter(fn(statement){statement.excuteStatement()})
+
+fn Excuter::excute(self:Excuter)->Unit{
+  self.loadTranslationUnit()
+
+  self.line=0
+  if not(self.is_error){
+    match self.functable.get("main"){
+      Ok(main) => self.excuteFunction(main)
+      Err(_) => self.otherError("Can not find 'main' function") 
+    }
+  }
+}
+
+fn Excuter::excuteFunction(self:Excuter,function:Function)->Unit{
+  whoAmI("excuteFunction")
+  //@Todo: parameter bind
+  self.excuteCompoundStatement(function.body)
+}
+
+
+
+// Translation Unit
+fn Excuter::loadTranslationUnit(self:Excuter)->Unit{
+  whoAmI("loadTranslationUnit")
+
+  match self.ast {
+    TranslationUnitAST(function_definitions) => 
+      function_definitions.iter(
+        fn(function_definition){
+          self.loadFunctionDefinition(function_definition)
+        }
+      )
     
-//     _ => excuteError("Unexpected AST")
-//   }
-// }
+    _=> ()
+  }
+}
+
+// Definition
+fn Excuter::loadFunctionDefinition(self:Excuter,function_definition:AST)->Unit{
+  whoAmI("loadFunctionDefinition")
+  
+  match function_definition {
+    FunctionDefinitionAST(ret_type,function_name,compound_statement) => {
+      self.line=function_name.line
+
+      let new_function:Function={
+        ret_type:match ret_type.t_type {VOID=>R_Void;INT=>R_Int},
+        name:function_name.lexeme,
+        body:compound_statement,
+        parameters:@vec.Vec::new(),//@Todo
+        vartable:VariableTable::new()
+      }
+
+      if not(self.functable.add(new_function)){
+        self.symbolError("The function: "+function_name.lexeme+" is redefined")
+      }
+    }
+
+    _ => ()
+  }
+}
 
 
 
-// // Statement
-// fn AST::excuteStatement(self:AST)->Unit{
-//   match self {
-//     StatementAST(x_statement) => 
-//       match x_statement {
-//         PrintStatementAST(_) => x_statement.excutePrintStatement()
+// Statement
+fn Excuter::excuteStatement(self:Excuter,statement:AST)->Unit{
+  whoAmI("excuteStatement")
+
+  match statement {
+    StatementAST(x_statement) => 
+      match x_statement {
+        CompoundStatementAST(_) => self.excuteCompoundStatement(x_statement)
+        PrintStatementAST(_) => self.excutePrintStatement(x_statement)
+        ExpressionAST(_) => self.excuteExpressionStatement(x_statement)
+        _ => ()
+      }
+    _ => ()
+  }
+}
+
+fn Excuter::excuteCompoundStatement(self:Excuter,compound_statement:AST)->Unit{
+  whoAmI("excuteCompoundStatement")
+
+  match compound_statement {
+    CompoundStatementAST(statements) => 
+      statements.iter(
+        fn(statement){
+          self.excuteStatement(statement)
+        }
+      )
+    _=>()
+  }
+}
+
+fn Excuter::excutePrintStatement(self:Excuter,print_statement:AST)->Unit{
+  whoAmI("excutePrintStatement")
+
+  match print_statement {
+    PrintStatementAST(expression) => println(self.excuteExpression(expression))
+    _ => ()
+  }
+}
+
+fn Excuter::excuteExpressionStatement(self:Excuter,expression_statement:AST)->Unit{
+  whoAmI("excuteExpressionStatement")
+
+  match expression_statement {
+    ExpressionStatementAST(expression) => {let x=self.excuteExpression(expression)}
+    _ => ()
+  }
+}
+
+
+
+// Expression
+fn Excuter::excuteExpression(self:Excuter,expression:AST)->Int{
+  match expression{
+    ExpressionAST(plusminus_expression) => self.excutePlusMinusExpression(plusminus_expression)
+    _ => error_number
+  }
+}
+
+fn Excuter::excutePlusMinusExpression(self:Excuter,plusminus_expression:AST)->Int{
+  match plusminus_expression {
+    PlusMinusExpressionAST(muldiv_expressions,infix_operators) => {
+      let mut value=self.excuteMulDivExpression(muldiv_expressions[0])
+      
+      for i=0;i<infix_operators.length();i=i+1{
+        let temp=self.excuteMulDivExpression(muldiv_expressions[i+1])
         
-//         _ => excuteError("Unexpected AST")
-//       }
-
-//     _ => excuteError("Unexpected AST")
-//   }
-// }
-
-// fn AST::excutePrintStatement(self:AST)->Unit{
-//   match self {
-//     PrintStatementAST(expression) => println(expression.excuteExpression())
+        match infix_operators[i].t_type{
+          PLUS => value+=temp
+          MINUS => value-=temp
+          _ => ()
+        }
+      }
     
-//     _ => excuteError("Unexpected AST")
-//   }
-// }
+      value
+    }
+    _ => error_number
+  }
+}
 
-
-
-// // Expression
-// fn AST::excuteExpression(self:AST)->Int{
-//   match self{
-//     ExpressionAST(plusminus_expressionexpression) => plusminus_expressionexpression.excutePlusMinusExpression()
-    
-//     _ => error_number
-//   }
-// }
-
-// fn AST::excutePlusMinusExpression(self:AST)->Int{
-//   match self {
-//     PlusMinusExpressionAST(muldiv_expressions,infix_operators) => {
-//       let mut value=muldiv_expressions[0].excuteMulDivExpression()
+fn Excuter::excuteMulDivExpression(self:Excuter,muldiv_expression:AST)->Int{
+  match muldiv_expression {
+    MulDiveExpressionAST(unary_expressions,infix_operators) => {
+      let mut value=self.excuteUnaryExpression(unary_expressions[0])
       
-//       for i=0;i<infix_operators.length();i=i+1{
-//         let temp=muldiv_expressions[i+1].excuteMulDivExpression()
+      for i=0;i<infix_operators.length();i=i+1{
+        let temp=self.excuteUnaryExpression(unary_expressions[i+1])
         
-//         match infix_operators[i].t_type{
-//           PLUS => value+=temp
-//           MINUS => value-=temp
-
-//           _ => excuteError("Unexpected operator")
-//         }
-//       }
+        match infix_operators[i].t_type{
+          MUL => value*=temp
+          DIV => value/=temp
+          MOD => value%=temp
+          _ => ()
+        }
+      }
       
-//       value
-//     }
+      value
+    }
+    _ => error_number
+  }
+}
 
-//     _ => error_number
-//   }
-// }
-
-// fn AST::excuteMulDivExpression(self:AST)->Int{
-//   match self {
-//     MulDiveExpressionAST(unary_expressions,infix_operators) => {
-//       let mut value=unary_expressions[0].excuteUnaryExpression()
+fn Excuter::excuteUnaryExpression(self:Excuter,unary_expression:AST)->Int{
+  match unary_expression {
+    UnaryExpressionAST(prefix_operator,primary_expression) => {
+      let mut value=self.excutePrimaryExpression(primary_expression)
       
-//       for i=0;i<infix_operators.length();i=i+1{
-//         let temp=unary_expressions[i+1].excuteUnaryExpression()
-        
-//         match infix_operators[i].t_type{
-//           MUL => value*=temp
-//           DIV => value/=temp
-//           MOD => value%=temp
+      match prefix_operator {
+        Some(t) => match t.t_type {MINUS => value=-value;_=>()}
+        None => ()
+      }
 
-//           _ => excuteError("Unexpected operator")
-//         }
-//       }
-      
-//       value
-//     }
+      value
+    }
+    _ => error_number
+  }
+}
 
-//     _ => error_number
-//   }
-// }
-
-// fn AST::excuteUnaryExpression(self:AST)->Int{
-//   match self {
-//     UnaryExpressionAST(prefix_operator,primary_expression) => {
-//       let value=primary_expression.excutePrimaryExpression()
-      
-//       match prefix_operator {
-//         Some(t) => match t.t_type {
-//           MINUS => -value
-
-//           _ => error_number
-//         }
-//         None => value
-//       }
-//     }
-
-//     _ => error_number
-//   }
-// }
-
-// fn AST::excutePrimaryExpression(self:AST)->Int{
-//   match self {
-//     PrimaryExpressionAST(Some(expression),None) => expression.excuteExpression()
-//     PrimaryExpressionAST(None,Some(value_int)) => value_int
-    
-//     _ => error_number
-//   }
-// }
+fn Excuter::excutePrimaryExpression(self:Excuter,primary_expression:AST)->Int{
+  match primary_expression {
+    PrimaryExpressionAST(Some(expression),None) => self.excuteExpression(expression)
+    PrimaryExpressionAST(None,Some(value_int)) => value_int
+    _ => error_number
+  }
+}
