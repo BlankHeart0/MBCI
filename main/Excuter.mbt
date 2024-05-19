@@ -1,3 +1,10 @@
+struct Excuter {
+  ast:AST
+  mut line:Int
+  mut is_error:Bool
+}
+
+
 // // Translation Unit
 // fn AST::excuteTranslationUnit(self:AST)->Unit{
 //   match self {
