@@ -1,6 +1,7 @@
 struct Excuter {
   ast:AST
   functable:FunctionTable
+  vartable_stack:@stack.Stack[VariableTable]
   mut line:Int
   mut is_error:Bool
 }
@@ -56,7 +57,6 @@ fn Excuter::loadFunctionDefinition(self:Excuter,function_definition:AST)->Unit{
         name:function_name.lexeme,
         body:compound_statement,
         parameters:@vec.Vec::new(),//@Todo
-        vartable:VariableTable::new()
       }
 
       if not(self.functable.add(new_function)){
@@ -189,8 +189,8 @@ fn Excuter::excuteUnaryExpression(self:Excuter,unary_expression:AST)->Int{
 
 fn Excuter::excutePrimaryExpression(self:Excuter,primary_expression:AST)->Int{
   match primary_expression {
-    PrimaryExpressionAST(Some(expression),None) => self.excuteExpression(expression)
-    PrimaryExpressionAST(None,Some(value_int)) => value_int
+    PrimaryExpressionAST(Some(expression),None,None) => self.excuteExpression(expression)
+    PrimaryExpressionAST(None,None,Some(value_int)) => value_int
     _ => error_number
   }
 }

@@ -47,17 +47,43 @@ fn Parser::parseFunctionDefinition(self:Parser)->Result[AST,Unit]{
   else {self.parseError("Function return type loss");Err(())}
 }
 
+fn Parser::parseLocalVariableDefinition(self:Parser)->Result[AST,Unit]{
+  whoAmI("parseLocalVariableDefinition")
+
+  if self.mattch(INT){
+    let data_type=self.consumed()
+
+    if self.mattch(IDENTIFIER){
+      let variable_name=self.consumed()
+
+      if self.mattch(ASSIGN){
+        let expression=self.parseExpression()?
+        self.mattchSemicolon()
+        
+        Ok(LocalVariableDefinitionAST(data_type,variable_name,Some(expression)))
+      }
+      else {
+        self.mattchSemicolon()
+
+        Ok(LocalVariableDefinitionAST(data_type,variable_name,None))
+      }
+    }
+    else {self.parseError("Variable name loss");Err(())}
+  }
+  else {self.parseError("Variable type loss");Err(())}
+}
 
 
 // Statement
 fn Parser::parseStatement(self:Parser)->Result[AST,Unit]{
   whoAmI("parseStatement")
 
-  let x_statement=match self.consuming().t_type{
-    LEFT_BRACE => self.parseCompoundStatement()?
-    PRINT => self.parsePrintStatement()?
-    _ => self.parseExpressionStatement()?
-  }
+  let x_statement:AST=
+    if self.peek1(INT) {self.parseLocalVariableDefinition()?}
+    else if self.peek1(LEFT_BRACE){self.parseCompoundStatement()?}
+    else if self.peek1(IDENTIFIER)&& self.peekN(ASSIGN,2){self.parseAssignStatement()?}
+    else if self.peek1(PRINT){self.parsePrintStatement()?}
+    else {self.parseExpressionStatement()?}
 
   Ok(StatementAST(x_statement))
 }
@@ -77,6 +103,24 @@ fn Parser::parseCompoundStatement(self:Parser)->Result[AST,Unit]{
     } 
   }
   else {self.parseError("Left brace '{' loss");Err(())}
+}
+
+fn Parser::parseAssignStatement(self:Parser)->Result[AST,Unit]{
+  whoAmI("parseAssignStatement")
+
+  if self.mattch(IDENTIFIER){
+    let variable=self.consumed()
+
+    if self.mattch(ASSIGN){
+      let expression=self.parseExpression()?
+      self.mattchSemicolon()
+
+      Ok(AssignStatementAST(variable,expression))
+    }
+    else {self.parseError("Assign character '=' loss");Err(())}
+  }
+  else {self.parseError("Variable name loss");Err(())}
+
 }
 
 fn Parser::parsePrintStatement(self:Parser)->Result[AST,Unit]{
@@ -159,15 +203,21 @@ fn Parser::parsePrimaryExpression(self:Parser)->Result[AST,Unit]{
   if self.mattch(LEFT_PAREN){
     let expression=self.parseExpression()?
 
-    if self.mattch(RIGHT_PAREN){Ok(PrimaryExpressionAST(Some(expression),None))}
+    if self.mattch(RIGHT_PAREN){Ok(PrimaryExpressionAST(Some(expression),None,None))}
     else {self.parseError("Right paren ')' loss");Err(())}
+  }
+  // Variable
+  else if self.mattch(IDENTIFIER){
+    let variable=self.consumed()
+    
+    Ok(PrimaryExpressionAST(None,Some(variable),None))
   }
   // CONSTANT_INT
   else {
     match self.consuming().t_type{
       CONSTANT_INT(value_int) => {
         self.consume()
-        Ok(PrimaryExpressionAST(None,Some(value_int)))
+        Ok(PrimaryExpressionAST(None,None,Some(value_int)))
       }
       _ => {
         self.parseError("Primary expression loss")

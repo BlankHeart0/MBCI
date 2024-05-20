@@ -4,10 +4,12 @@ enum AST{
 
   // Definition
   FunctionDefinitionAST(Token,Token,AST)
+  LocalVariableDefinitionAST(Token,Token,Option[AST])
 
   // Statement
   StatementAST(AST)
   CompoundStatementAST(@vec.Vec[AST])
+  AssignStatementAST(Token,AST)
   PrintStatementAST(AST)
   ExpressionStatementAST(AST)
 
@@ -16,7 +18,7 @@ enum AST{
   PlusMinusExpressionAST(@vec.Vec[AST],@vec.Vec[Token])
   MulDiveExpressionAST(@vec.Vec[AST],@vec.Vec[Token])
   UnaryExpressionAST(Option[Token],AST)
-  PrimaryExpressionAST(Option[AST],Option[Int])
+  PrimaryExpressionAST(Option[AST],Option[Token],Option[Int])
 }
 
 fn AST::astPrint(self:AST,depth:Int)->Unit{
@@ -41,6 +43,19 @@ fn AST::astPrint(self:AST,depth:Int)->Unit{
       println(" function_name:"+function_name.lexeme)
       compound_statement.astPrint(depth+1)
     }
+    
+    LocalVariableDefinitionAST(data_type,variable_name,expression_option) => {
+      print("FunctionDefinitionAST")
+      print(" data_type:"+data_type.lexeme)
+      println(" variable_name:"+variable_name.lexeme)
+      match expression_option {
+        Some(expression) => {
+          deepPrintln(" INITIALIZE =")
+          expression.astPrint(depth+1)
+        }
+        None => ()
+      }
+    }
 
     // Statement
     StatementAST(x_statement) => {
@@ -51,6 +66,13 @@ fn AST::astPrint(self:AST,depth:Int)->Unit{
     CompoundStatementAST(statements) => {
       println("CompoundStatementAST")
       statements.iter(childrenPrint)
+    }
+
+    AssignStatementAST(variable,expression) => {
+      print("AssignStatementAST")
+      println(" variale:"+variable.lexeme)
+      deepPrintln(" ASSIGN =")
+      expression.astPrint(depth+1)
     }
 
     PrintStatementAST(expression) => {
@@ -99,14 +121,18 @@ fn AST::astPrint(self:AST,depth:Int)->Unit{
       primary_expression.astPrint(depth+1)
     }
 
-    PrimaryExpressionAST(expression_option,constantInt_option) => {
+    PrimaryExpressionAST(expression_option,variable_option,constantInt_option) => {
       println("PrimaryExpressionAST")
       match expression_option {
         Some(expression) => expression.astPrint(depth+1)
-        _ => match constantInt_option {
-              Some(value_int) => deepPrintln(" value_int:"+value_int.to_string())
-              _=> ()
-            }
+        _ => match variable_option {
+          Some(variable) => deepPrintln(" variable:"+variable.lexeme)
+          _ =>match constantInt_option {
+            Some(value_int) => deepPrintln(" value_int:"+value_int.to_string())
+            _=> ()
+          }
+        } 
+        
       }
     }
   }

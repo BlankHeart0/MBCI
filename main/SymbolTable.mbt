@@ -77,7 +77,6 @@ struct Function {
   name:String
   body:AST
   parameters:@vec.Vec[Parameter]
-  vartable:VariableTable
 }
 
 struct FunctionTable {

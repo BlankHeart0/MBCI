@@ -32,6 +32,7 @@ fn interpret(source:String)->Unit{
       let excuter:Excuter={
         ast:ast,
         functable:FunctionTable::new(),
+        vartable_stack:@stack.Stack::new(),
         line:0,
         is_error:false
       }
@@ -46,4 +47,5 @@ fn main {
   interpret(@test.expression_t1)
   interpret(@test.expression_t2)
   interpret(@test.expression_t3)
+  interpret(@test.scope)
 }
