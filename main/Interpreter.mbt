@@ -45,8 +45,7 @@ fn interpret(source:String)->Unit{
 }
 
 fn main {
-  interpret(@test.expression_t1)
-  interpret(@test.expression_t2)
-  interpret(@test.expression_t3)
+  interpret(@test.expression)
   interpret(@test.scope)
+  interpret(@test.add)
 }

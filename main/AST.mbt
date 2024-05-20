@@ -3,7 +3,8 @@ enum AST{
   TranslationUnitAST(@vec.Vec[AST])
 
   // Definition
-  FunctionDefinitionAST(Token,Token,AST)
+  FunctionDefinitionAST(Token,Token,@vec.Vec[AST],AST)
+  ParameterAST(Token,Token)
   LocalVariableDefinitionAST(Token,Token,Option[AST])
 
   // Statement
@@ -19,6 +20,7 @@ enum AST{
   MulDiveExpressionAST(@vec.Vec[AST],@vec.Vec[Token])
   UnaryExpressionAST(Option[Token],AST)
   PrimaryExpressionAST(Option[AST],Option[Token],Option[Int])
+  FunctionCallExpressionAST(Token,@vec.Vec[AST])
 }
 
 fn AST::astPrint(self:AST,depth:Int)->Unit{
@@ -37,13 +39,20 @@ fn AST::astPrint(self:AST,depth:Int)->Unit{
     }
       
     // Definition
-    FunctionDefinitionAST(ret_type,function_name,compound_statement) => {
+    FunctionDefinitionAST(ret_type,function_name,parameters,compound_statement) => {
       print("FunctionDefinitionAST")
       print(" ret_type:"+ret_type.lexeme)
       println(" function_name:"+function_name.lexeme)
+      parameters.iter(childrenPrint)
       compound_statement.astPrint(depth+1)
     }
     
+    ParameterAST(data_type,parameter_name) => {
+      print("ParameterAST")
+      print(" data_type:"+data_type.lexeme)
+      println(" parameter_name:"+parameter_name.lexeme)
+    }
+
     LocalVariableDefinitionAST(data_type,variable_name,expression_option) => {
       print("LocalVariableDefinitionAST")
       print(" data_type:"+data_type.lexeme)
@@ -109,7 +118,7 @@ fn AST::astPrint(self:AST,depth:Int)->Unit{
       }
     }
 
-    UnaryExpressionAST(prefix_operator_option,primary_expression) => {
+    UnaryExpressionAST(prefix_operator_option,x_expression) => {
       println("UnaryExpressionAST")
       match prefix_operator_option {
         Some(prefix_operator) => match prefix_operator.t_type{
@@ -118,7 +127,7 @@ fn AST::astPrint(self:AST,depth:Int)->Unit{
         }
         _ => ()
       }
-      primary_expression.astPrint(depth+1)
+      x_expression.astPrint(depth+1)
     }
 
     PrimaryExpressionAST(expression_option,variable_option,constantInt_option) => {
@@ -132,8 +141,13 @@ fn AST::astPrint(self:AST,depth:Int)->Unit{
             _=> ()
           }
         } 
-        
       }
+    }
+
+    FunctionCallExpressionAST(function,expressions) => {
+      print("FunctionCallExpressionAST")
+      println(" function:"+function.lexeme)
+      expressions.iter(childrenPrint)
     }
   }
 }

@@ -1,13 +1,6 @@
-pub let expression_t1 =
-  #|int main(){
-  #|  2+3+4+5;
-  #|}
-
-pub let expression_t2 =
-  #|print 100/10+1000/100-(10+10);
-
-pub let expression_t3 =
+pub let expression =
   #|int add(){
+  #|  2+3+4+5;
   #|  print 0;
   #|}
   #|

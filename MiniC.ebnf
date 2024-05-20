@@ -1,16 +1,19 @@
-# Mini C EBNF Grammar 2024
+# Mini C EBNF Grammar <@BlankHeart---2024>
 
 # Translation Unit
 <Translation_Unit> ::= {<Function_Definition>} CODE_EOF
 
 # Definition
-<Function_Definition> ::= (VOID|INT) IDENTIFIER "(" ")" <Compound_Statement>
+<Function_Definition> ::= (VOID|INT) IDENTIFIER "(" [<Parameter>{","<Parameter>}] ")" <Compound_Statement>
+<Parameter> ::= INT IDENTIFIER
+
 <LocalVariable_Definition> ::= (INT) IDENTIFIER ["="<Expression>]";"
 
 # Statement
 <Statement> ::= <LocalVariable_Definition> | <Compound_Statement> | 
                 <Assign_Statement> | <Print_Statement> | <Expression_Statement>
 <Compound_Statement> ::= "{"{<Statement>}"}"
+
 <Assign_Statement> ::= IDENTIFIER "=" <Expression> ";"
 <Print_Statement> ::= PRINT <Expression> ";"
 <Expression_Statement> ::= <Expression> ";"
@@ -20,5 +23,6 @@
 
 <PlusMinus_Expression> ::= <MulDiv_Expression>{("+" | "-")<MulDiv_Expression>}
 <MulDiv_Expression> ::= <Unary_Expression>{("*" | "/" | "%")<Unary_Expression>}
-<Unary_Expression> ::= ["-"]<Primary_Expression> 
+<Unary_Expression> ::= ["-"] (<Primary_Expression> | <FunctionCall_Expression>)
 <Primary_Expression> ::= "("<Expression>")" | IDENTIFIER | CONSTANT_INT
+<FunctionCall_Expression>::= IDENTIFIER "(" [<Expression>{","<Expression>}] ")"                      

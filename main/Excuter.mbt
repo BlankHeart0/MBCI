@@ -51,7 +51,7 @@ fn Excuter::loadFunctionDefinition(self:Excuter,function_definition:AST)->Unit{
   whoAmI("loadFunctionDefinition")
   
   match function_definition {
-    FunctionDefinitionAST(ret_type,function_name,compound_statement) => {
+    FunctionDefinitionAST(ret_type,function_name,parameters,compound_statement) => {
       self.line=function_name.line
 
       let new_function:Function={
@@ -245,7 +245,7 @@ fn Excuter::excutePrimaryExpression(self:Excuter,primary_expression:AST)->Int{
     PrimaryExpressionAST(None,Some(variable),None) => 
       match self.vartable_stack[self.vartable_stack.length()-1].get(variable.lexeme){
         Ok(value) => value
-        Err(_) => error_number
+        Err(_) => error_number//@Todo
       }
     PrimaryExpressionAST(None,None,Some(value_int)) => value_int
     _ => error_number

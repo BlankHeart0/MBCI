@@ -33,10 +33,19 @@ fn Parser::parseFunctionDefinition(self:Parser)->Result[AST,Unit]{
       let function_name=self.consumed()
 
       if self.mattch(LEFT_PAREN){
+        let parameters=@vec.Vec::new()
+
+        if not(self.peek1(RIGHT_PAREN)){
+          parameters.push(self.parseParameter()?)
+          while self.mattch(COMMA){
+            parameters.push(self.parseParameter()?)
+          }
+        }
+
         if self.mattch(RIGHT_PAREN){
           let compound_statement=self.parseCompoundStatement()?
 
-          Ok(FunctionDefinitionAST(ret_type,function_name,compound_statement))
+          Ok(FunctionDefinitionAST(ret_type,function_name,parameters,compound_statement))
         }
         else {self.parseError("Right paren ')' loss");Err(())}
       }
@@ -45,6 +54,22 @@ fn Parser::parseFunctionDefinition(self:Parser)->Result[AST,Unit]{
     else {self.parseError("Function name loss");Err(())}
   }
   else {self.parseError("Function return type loss");Err(())}
+}
+
+fn Parser::parseParameter(self:Parser)->Result[AST,Unit]{
+  whoAmI("parseParameter")
+
+  if self.mattch(INT){
+    let data_type=self.consumed()
+
+    if self.mattch(IDENTIFIER){
+      let parameter_name=self.consumed()
+
+      Ok(ParameterAST(data_type,parameter_name))
+    }
+    else {self.parseError("Parameter name loss");Err(())}
+  }
+  else {self.parseError("Parameter type loss");Err(())}
 }
 
 fn Parser::parseLocalVariableDefinition(self:Parser)->Result[AST,Unit]{
@@ -191,9 +216,13 @@ fn Parser::parseUnaryExpression(self:Parser)->Result[AST,Unit]{
     if self.mattch(MINUS) {Some(self.consumed())}
     else {None}
   
-  let primary_expression=self.parsePrimaryExpression()?
+  let x_expression=
+    if self.peek1(IDENTIFIER)&&self.peekN(LEFT_PAREN,2){
+      self.parseFunctionCallExpression()?
+    }
+    else {self.parsePrimaryExpression()?}
 
-  Ok(UnaryExpressionAST(prefix_operator,primary_expression))
+  Ok(UnaryExpressionAST(prefix_operator,x_expression))
 }
 
 fn Parser::parsePrimaryExpression(self:Parser)->Result[AST,Unit]{
@@ -225,6 +254,32 @@ fn Parser::parsePrimaryExpression(self:Parser)->Result[AST,Unit]{
       }
     }
   }
+}
+
+fn Parser::parseFunctionCallExpression(self:Parser)->Result[AST,Unit]{
+  whoAmI("parseFunctionCallExpression")
+
+  if self.mattch(IDENTIFIER){
+    let function=self.consumed()
+
+    if self.mattch(LEFT_PAREN){
+
+      let expressions=@vec.Vec::new()
+      if not(self.peek1(RIGHT_PAREN)){
+        expressions.push(self.parseExpression()?)
+        while self.mattch(COMMA){
+          expressions.push(self.parseExpression()?)
+        }
+      }
+
+      if self.mattch(RIGHT_PAREN){
+        Ok(FunctionCallExpressionAST(function,expressions))
+      }
+      else {self.parseError("Right paren ')' loss");Err(())}
+    }
+    else {self.parseError("Left paren '(' loss");Err(())}
+  }
+  else {self.parseError("Function name loss");Err(())}
 }
 
 
