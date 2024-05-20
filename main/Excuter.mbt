@@ -1,7 +1,8 @@
 struct Excuter {
   ast:AST
   functable:FunctionTable
-  vartable_stack:@stack.Stack[VariableTable]
+  vartable_stack:@vec.Vec[VariableTable]
+  mut is_returned:Bool
   mut line:Int
   mut is_error:Bool
 }
@@ -23,6 +24,7 @@ fn Excuter::excute(self:Excuter)->Unit{
 fn Excuter::excuteFunction(self:Excuter,function:Function)->Unit{
   whoAmI("excuteFunction")
   //@Todo: parameter bind
+  self.vartable_stack.push(VariableTable::new())
   self.excuteCompoundStatement(function.body)
 }
 
@@ -63,7 +65,32 @@ fn Excuter::loadFunctionDefinition(self:Excuter,function_definition:AST)->Unit{
         self.symbolError("The function: "+function_name.lexeme+" is redefined")
       }
     }
+    _ => ()
+  }
+}
 
+fn Excuter::excuteLocalVariableDefinition(self:Excuter,localvar_definition:AST)->Unit{
+  whoAmI("excuteLocalVariableDefinition")
+
+  match localvar_definition{
+    LocalVariableDefinitionAST(data_type,variable_name,expression_option) => {
+      self.line=variable_name.line
+
+      let initial_value=match expression_option{
+        Some(expression) => self.excuteExpression(expression)
+        None => 0
+      }
+      
+      let new_variable:Variable={
+        data_type:match data_type.t_type {INT=>D_Int},
+        name:variable_name.lexeme,
+        value:initial_value
+      }
+
+      if not(self.vartable_stack[self.vartable_stack.length()-1].add(new_variable)){
+        self.symbolError("The variable: "+variable_name.lexeme+" is redefined")
+      }
+    }
     _ => ()
   }
 }
@@ -73,11 +100,14 @@ fn Excuter::loadFunctionDefinition(self:Excuter,function_definition:AST)->Unit{
 // Statement
 fn Excuter::excuteStatement(self:Excuter,statement:AST)->Unit{
   whoAmI("excuteStatement")
+  if self.is_returned||self.is_error {return}
 
   match statement {
     StatementAST(x_statement) => 
       match x_statement {
+        LocalVariableDefinitionAST(_) => self.excuteLocalVariableDefinition(x_statement)
         CompoundStatementAST(_) => self.excuteCompoundStatement(x_statement)
+        AssignStatementAST(_) => self.excuteAssignStatement(x_statement)
         PrintStatementAST(_) => self.excutePrintStatement(x_statement)
         ExpressionAST(_) => self.excuteExpressionStatement(x_statement)
         _ => ()
@@ -89,6 +119,8 @@ fn Excuter::excuteStatement(self:Excuter,statement:AST)->Unit{
 fn Excuter::excuteCompoundStatement(self:Excuter,compound_statement:AST)->Unit{
   whoAmI("excuteCompoundStatement")
 
+  self.vartable_stack[self.vartable_stack.length()-1].enterScope()
+
   match compound_statement {
     CompoundStatementAST(statements) => 
       statements.iter(
@@ -98,6 +130,26 @@ fn Excuter::excuteCompoundStatement(self:Excuter,compound_statement:AST)->Unit{
       )
     _=>()
   }
+
+  self.vartable_stack[self.vartable_stack.length()-1].leaveScope()
+}
+
+fn Excuter::excuteAssignStatement(self:Excuter,assign_statement:AST)->Unit{
+  whoAmI("excuteAssignStatement")
+
+  match assign_statement {
+    AssignStatementAST(variable,expression) => {
+      self.line=variable.line
+
+      let expression_value=self.excuteExpression(expression)
+
+      if not(self.vartable_stack[self.vartable_stack.length()-1].set(variable.lexeme,expression_value)){
+        self.symbolError("The variable: "+variable.lexeme+" is undefined")
+      }
+    }
+    _ => ()
+  }
+
 }
 
 fn Excuter::excutePrintStatement(self:Excuter,print_statement:AST)->Unit{
@@ -190,6 +242,11 @@ fn Excuter::excuteUnaryExpression(self:Excuter,unary_expression:AST)->Int{
 fn Excuter::excutePrimaryExpression(self:Excuter,primary_expression:AST)->Int{
   match primary_expression {
     PrimaryExpressionAST(Some(expression),None,None) => self.excuteExpression(expression)
+    PrimaryExpressionAST(None,Some(variable),None) => 
+      match self.vartable_stack[self.vartable_stack.length()-1].get(variable.lexeme){
+        Ok(value) => value
+        Err(_) => error_number
+      }
     PrimaryExpressionAST(None,None,Some(value_int)) => value_int
     _ => error_number
   }

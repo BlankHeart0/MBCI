@@ -45,7 +45,7 @@ fn AST::astPrint(self:AST,depth:Int)->Unit{
     }
     
     LocalVariableDefinitionAST(data_type,variable_name,expression_option) => {
-      print("FunctionDefinitionAST")
+      print("LocalVariableDefinitionAST")
       print(" data_type:"+data_type.lexeme)
       println(" variable_name:"+variable_name.lexeme)
       match expression_option {

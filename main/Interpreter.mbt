@@ -32,7 +32,8 @@ fn interpret(source:String)->Unit{
       let excuter:Excuter={
         ast:ast,
         functable:FunctionTable::new(),
-        vartable_stack:@stack.Stack::new(),
+        vartable_stack:@vec.Vec::new(),
+        is_returned:false,
         line:0,
         is_error:false
       }

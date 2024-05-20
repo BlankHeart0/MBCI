@@ -22,7 +22,7 @@ fn VariableTable::enterScope(self:VariableTable)->Unit{
 }
 
 fn VariableTable::leaveScope(self:VariableTable)->Unit{
-  let x=self.table.pop()
+  let x=self.table.pop_exn()
 }
 
 fn VariableTable::add(self:VariableTable,variable:Variable)->Bool{
