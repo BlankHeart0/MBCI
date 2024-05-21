@@ -11,6 +11,7 @@ enum AST{
   StatementAST(AST)
   CompoundStatementAST(@vec.Vec[AST])
   AssignStatementAST(Token,AST)
+  ReturnStatementAST(Option[AST])
   PrintStatementAST(AST)
   ExpressionStatementAST(AST)
 
@@ -84,6 +85,16 @@ fn AST::astPrint(self:AST,depth:Int)->Unit{
       expression.astPrint(depth+1)
     }
 
+    ReturnStatementAST(expression_option) => {
+      println("ReturnStatementAST")
+      match expression_option {
+        Some(expression) => {
+          deepPrintln(" RETURN value")
+          expression.astPrint(depth+1)
+        }
+        None => ()
+      }
+    }
     PrintStatementAST(expression) => {
       println("PrintStatementAST")
       expression.astPrint(depth+1)
@@ -149,5 +160,6 @@ fn AST::astPrint(self:AST,depth:Int)->Unit{
       println(" function:"+function.lexeme)
       expressions.iter(childrenPrint)
     }
+
   }
 }

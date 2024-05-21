@@ -10,11 +10,12 @@
 <LocalVariable_Definition> ::= (INT) IDENTIFIER ["="<Expression>]";"
 
 # Statement
-<Statement> ::= <LocalVariable_Definition> | <Compound_Statement> | 
-                <Assign_Statement> | <Print_Statement> | <Expression_Statement>
+<Statement> ::= <LocalVariable_Definition> | <Compound_Statement> | <Assign_Statement> | 
+                <Return_Statement> | <Print_Statement> | <Expression_Statement>
 <Compound_Statement> ::= "{"{<Statement>}"}"
 
 <Assign_Statement> ::= IDENTIFIER "=" <Expression> ";"
+<Return_Statement> ::= RETURN [<Expression>] ";"
 <Print_Statement> ::= PRINT <Expression> ";"
 <Expression_Statement> ::= <Expression> ";"
 

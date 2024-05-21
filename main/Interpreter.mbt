@@ -19,6 +19,7 @@ fn interpret(source:String)->Unit{
     tokens:tokens,
     current:0,
     line:1,
+    is_void:false,
     is_error:false
   }
   let ast=parser.parseTranslationUnit()

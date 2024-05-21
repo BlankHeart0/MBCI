@@ -2,6 +2,7 @@ struct Parser {
   tokens:@vec.Vec[Token]
   mut current:Int
   mut line:Int
+  mut is_void:Bool
   mut is_error:Bool
 }
 
@@ -28,7 +29,11 @@ fn Parser::parseFunctionDefinition(self:Parser)->Result[AST,Unit]{
 
   if self.mattch(VOID)||self.mattch(INT){
     let ret_type=self.consumed()
-    
+    match ret_type.t_type{
+      VOID => self.is_void=true
+      _ => self.is_void=false
+    }
+
     if self.mattch(IDENTIFIER){
       let function_name=self.consumed()
 
@@ -107,6 +112,7 @@ fn Parser::parseStatement(self:Parser)->Result[AST,Unit]{
     if self.peek1(INT) {self.parseLocalVariableDefinition()?}
     else if self.peek1(LEFT_BRACE){self.parseCompoundStatement()?}
     else if self.peek1(IDENTIFIER)&& self.peekN(ASSIGN,2){self.parseAssignStatement()?}
+    else if self.peek1(RETURN){self.parseReturnStatement()?}
     else if self.peek1(PRINT){self.parsePrintStatement()?}
     else {self.parseExpressionStatement()?}
 
@@ -147,6 +153,36 @@ fn Parser::parseAssignStatement(self:Parser)->Result[AST,Unit]{
   else {self.parseError("Variable name loss");Err(())}
 
 }
+
+fn Parser::parseReturnStatement(self:Parser)->Result[AST,Unit]{
+  whoAmI("parseReturnStatement")
+
+  if self.mattch(RETURN){
+    if not(self.peek1(SEMICOLON)){
+      if self.is_void{
+        self.parseError("Void function can't return some value")
+        return Err(())
+      }
+
+      let expression=self.parseExpression()?
+      self.mattchSemicolon()
+
+      Ok(ReturnStatementAST(Some(expression)))
+    }
+    else {
+      if not(self.is_void){
+        self.parseError("Non-void function can't return void")
+        return Err(())
+      }
+
+      self.mattchSemicolon()
+
+      Ok(ReturnStatementAST(None))
+    }
+  }
+  else {self.parseError("Keyword 'return' loss");Err(())}
+}
+
 
 fn Parser::parsePrintStatement(self:Parser)->Result[AST,Unit]{
   whoAmI("parsePrintStatement")
