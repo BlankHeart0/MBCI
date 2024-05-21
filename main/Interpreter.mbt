@@ -37,7 +37,7 @@ fn interpret(program_name:String,source:String)->Unit{
     Ok(ast) => {
       astPrint(ast,0) // print ast
       println("")
-      
+
       //Excute
       println("--------------- Excuting ---------------->")
       let excuter:Excuter={
@@ -59,7 +59,7 @@ fn interpret(program_name:String,source:String)->Unit{
 }
 
 fn main {
-  interpret("expression",@test.expression)
   interpret("scope",@test.scope)
   interpret("add",@test.add)
+  interpret("expression",@test.expression)
 }

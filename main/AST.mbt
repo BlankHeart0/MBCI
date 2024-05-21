@@ -17,6 +17,10 @@ enum AST{
 
   // Expression
   ExpressionAST(AST)
+  LogicOrExpressionAST(@vec.Vec[AST],@vec.Vec[Token])
+  LogicAndExpressionAST(@vec.Vec[AST],@vec.Vec[Token])
+  EqualityExpressionAST(@vec.Vec[AST],@vec.Vec[Token])
+  RelationalExpressionAST(@vec.Vec[AST],@vec.Vec[Token])
   PlusMinusExpressionAST(@vec.Vec[AST],@vec.Vec[Token])
   MulDiveExpressionAST(@vec.Vec[AST],@vec.Vec[Token])
   UnaryExpressionAST(Option[Token],AST)
@@ -95,6 +99,7 @@ fn AST::astPrint(self:AST,depth:Int)->Unit{
         None => ()
       }
     }
+
     PrintStatementAST(expression) => {
       println("PrintStatementAST")
       expression.astPrint(depth+1)
@@ -106,9 +111,45 @@ fn AST::astPrint(self:AST,depth:Int)->Unit{
     }
 
     // Expression
-    ExpressionAST(plusminus_expression) => {
+    ExpressionAST(logicOr_expression) => {
       println("ExpressionAST")
-      plusminus_expression.astPrint(depth+1)
+      logicOr_expression.astPrint(depth+1)
+    }
+
+    LogicOrExpressionAST(logicAnd_expressions,infix_operators) => {
+      println("LogicOrExpressionAST")
+      logicAnd_expressions[0].astPrint(depth+1)
+      for i=0;i<infix_operators.length();i=i+1{
+        deepPrintln(" infix_operator:"+infix_operators[i].lexeme)
+        logicAnd_expressions[i+1].astPrint(depth+1)
+      }
+    }
+
+    LogicAndExpressionAST(equlity_expressions,infix_operators) => {
+      println("LogicAndExpressionAST")
+      equlity_expressions[0].astPrint(depth+1)
+      for i=0;i<infix_operators.length();i=i+1{
+        deepPrintln(" infix_operator:"+infix_operators[i].lexeme)
+        equlity_expressions[i+1].astPrint(depth+1)
+      }
+    }
+
+    EqualityExpressionAST(relational_expressions,infix_operators) => {
+      println("EqualityExpressionAST")
+      relational_expressions[0].astPrint(depth+1)
+      for i=0;i<infix_operators.length();i=i+1{
+        deepPrintln(" infix_operator:"+infix_operators[i].lexeme)
+        relational_expressions[i+1].astPrint(depth+1)
+      }
+    }
+
+    RelationalExpressionAST(plusminus_expressions,infix_operators) => {
+      println("RelationalExpressionAST")
+      plusminus_expressions[0].astPrint(depth+1)
+      for i=0;i<infix_operators.length();i=i+1{
+        deepPrintln(" infix_operator:"+infix_operators[i].lexeme)
+        plusminus_expressions[i+1].astPrint(depth+1)
+      }
     }
 
     PlusMinusExpressionAST(muldiv_expressions,infix_operators) => {
@@ -133,7 +174,7 @@ fn AST::astPrint(self:AST,depth:Int)->Unit{
       println("UnaryExpressionAST")
       match prefix_operator_option {
         Some(prefix_operator) => match prefix_operator.t_type{
-          MINUS => deepPrintln(" prefix_operator:"+prefix_operator.lexeme)
+          MINUS | NOT => deepPrintln(" prefix_operator:"+prefix_operator.lexeme)
           _ => ()
         }
         _ => ()

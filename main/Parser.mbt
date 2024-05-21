@@ -210,9 +210,69 @@ fn Parser::parseExpressionStatement(self:Parser)->Result[AST,Unit]{
 fn Parser::parseExpression(self:Parser)->Result[AST,Unit]{
   whoAmI("parseExpression")
 
-  let plusminus_expression=self.parsePlusMinusExpression()?
+  let logicOr_expression=self.parseLogicOrExpression()?
 
-  Ok(ExpressionAST(plusminus_expression))
+  Ok(ExpressionAST(logicOr_expression))
+}
+
+fn Parser::parseLogicOrExpression(self:Parser)->Result[AST,Unit]{
+  whoAmI("parseLogicOrExpression")
+  
+  let logicAnd_expressions=@vec.Vec::new()
+  let infix_operators=@vec.Vec::new()
+
+  logicAnd_expressions.push(self.parseLogicAndExpression()?)
+  while self.mattch(OR){
+    infix_operators.push(self.consumed())
+    logicAnd_expressions.push(self.parseLogicAndExpression()?)
+  }
+
+  Ok(LogicOrExpressionAST(logicAnd_expressions,infix_operators))
+}
+
+fn Parser::parseLogicAndExpression(self:Parser)->Result[AST,Unit]{
+  whoAmI("parseLogicAndExpression")
+
+  let equlity_expressions=@vec.Vec::new()
+  let infix_operators=@vec.Vec::new()
+  
+  equlity_expressions.push(self.parseEqualityExpression()?)
+  while self.mattch(AND){
+    infix_operators.push(self.consumed())
+    equlity_expressions.push(self.parseEqualityExpression()?)
+  }
+
+  Ok(LogicAndExpressionAST(equlity_expressions,infix_operators))
+}
+
+fn Parser::parseEqualityExpression(self:Parser)->Result[AST,Unit]{
+  whoAmI("parseEqualityExpression")
+
+  let relational_expressions=@vec.Vec::new()
+  let infix_operators=@vec.Vec::new()
+  
+  relational_expressions.push(self.parseRelationalExpression()?)
+  while self.mattch(EQUAL)||self.mattch(NOT_EQUAL){
+    infix_operators.push(self.consumed())
+    relational_expressions.push(self.parseRelationalExpression()?)
+  }
+
+  Ok(EqualityExpressionAST(relational_expressions,infix_operators))
+}
+
+fn Parser::parseRelationalExpression(self:Parser)->Result[AST,Unit]{
+  whoAmI("parseRelationalExpression")
+
+  let plusminus_expressions=@vec.Vec::new()
+  let infix_operators=@vec.Vec::new()
+  
+  plusminus_expressions.push(self.parsePlusMinusExpression()?)
+  while self.mattch(LESS)||self.mattch(LESS_EQUAL)||self.mattch(GREATER)||self.mattch(GREATER_EQUAL){
+    infix_operators.push(self.consumed())
+    plusminus_expressions.push(self.parsePlusMinusExpression()?)
+  }
+
+  Ok(RelationalExpressionAST(plusminus_expressions,infix_operators))
 }
 
 fn Parser::parsePlusMinusExpression(self:Parser)->Result[AST,Unit]{
@@ -249,7 +309,7 @@ fn Parser::parseUnaryExpression(self:Parser)->Result[AST,Unit]{
   whoAmI("parseUnaryExpression")
 
   let prefix_operator:Option[Token]=
-    if self.mattch(MINUS) {Some(self.consumed())}
+    if self.mattch(MINUS)||self.mattch(NOT) {Some(self.consumed())}
     else {None}
   
   let x_expression=

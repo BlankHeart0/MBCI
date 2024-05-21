@@ -20,10 +20,14 @@
 <Expression_Statement> ::= <Expression> ";"
 
 # Expression
-<Expression> ::= <PlusMinus_Expression>
+<Expression> ::= <LogicOr_Expression>
 
+<LogicOr_Expression> ::= <LogicAnd_Expression>{"||"<LogicAnd_Expression>}
+<LogicAnd_Expression> ::= <Equality_Expression>{"&&"<Equality_Expression>}
+<Equality_Expression> ::= <Relational_Expression>{("==" | "!=")<Relational_Expression>}
+<Relational_Expression> ::= <PlusMinus_Expression>{("<" | "<=" | ">" | ">=")<PlusMinus_Expression>}
 <PlusMinus_Expression> ::= <MulDiv_Expression>{("+" | "-")<MulDiv_Expression>}
 <MulDiv_Expression> ::= <Unary_Expression>{("*" | "/" | "%")<Unary_Expression>}
-<Unary_Expression> ::= ["-"] (<Primary_Expression> | <FunctionCall_Expression>)
+<Unary_Expression> ::= ["-"|"!"] (<Primary_Expression> | <FunctionCall_Expression>)
 <Primary_Expression> ::= "("<Expression>")" | IDENTIFIER | CONSTANT_INT
 <FunctionCall_Expression>::= IDENTIFIER "(" [<Expression>{","<Expression>}] ")"                      

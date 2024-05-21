@@ -238,7 +238,99 @@ fn Excuter::excuteExpression(self:Excuter,expression:AST)->Int{
   whoAmI("excuteExpression")
   
   match expression{
-    ExpressionAST(plusminus_expression) => self.excutePlusMinusExpression(plusminus_expression)
+    ExpressionAST(logicOr_expression) => self.excuteLogicOrExpression(logicOr_expression)
+    _ => error_number
+  }
+}
+
+fn Excuter::excuteLogicOrExpression(self:Excuter,logicOr_expression:AST)->Int{
+  whoAmI("excuteLogicOrExpression")
+
+  match logicOr_expression {
+    LogicOrExpressionAST(logicAnd_expressions,infix_operators) => {
+      let mut value=self.excuteLogicAndExpression(logicAnd_expressions[0])
+
+      for i=0;i<infix_operators.length();i=i+1{
+        let temp=self.excuteLogicAndExpression(logicAnd_expressions[i+1])
+        
+        match infix_operators[i].t_type{
+          OR => if value==0&&temp==0 {value=0}else{value=1}
+          _ => ()
+        }
+      }
+
+      value
+    }
+    _ => error_number
+  }
+}
+
+fn Excuter::excuteLogicAndExpression(self:Excuter,logicAnd_expression:AST)->Int{
+  whoAmI("excuteLogicAndExpression")
+
+  match logicAnd_expression {
+    LogicAndExpressionAST(equlity_expressions,infix_operators) => {
+      let mut value=self.excuteEqualityExpression(equlity_expressions[0])
+
+      for i=0;i<infix_operators.length();i=i+1{
+        let temp=self.excuteEqualityExpression(equlity_expressions[i+1])
+        
+        match infix_operators[i].t_type{
+          AND => if value==0||temp==0 {value=0}else{value=1}
+          _ => ()
+        }
+      }
+
+      value
+    }
+    _ => error_number
+  }
+}
+
+fn Excuter::excuteEqualityExpression(self:Excuter,equlity_expression:AST)->Int{
+  whoAmI("excuteEqualityExpression")
+
+  match equlity_expression {
+    EqualityExpressionAST(relational_expressions,infix_operators) => {
+      let mut value=self.excuteRelationalExpression(relational_expressions[0])
+
+      for i=0;i<infix_operators.length();i=i+1{
+        let temp=self.excuteRelationalExpression(relational_expressions[i+1])
+        
+        match infix_operators[i].t_type{
+          EQUAL     => if value==temp {value=1}else{value=0}
+          NOT_EQUAL => if value!=temp {value=1}else{value=0}
+          _ => ()
+        }
+      }
+
+      value
+    }
+    _ => error_number
+  }
+}
+
+fn Excuter::excuteRelationalExpression(self:Excuter,relational_expression:AST)->Int{
+  whoAmI("excuteRelationalExpression")
+
+  match relational_expression {
+    RelationalExpressionAST(plusminus_expressions,infix_operators) => {
+      let mut value=self.excutePlusMinusExpression(plusminus_expressions[0])
+
+      for i=0;i<infix_operators.length();i=i+1{
+        let temp=self.excutePlusMinusExpression(plusminus_expressions[i+1])
+        
+        match infix_operators[i].t_type{
+          LESS          => if value<temp  {value=1}else{value=0}
+          LESS_EQUAL    => if value<=temp {value=1}else{value=0}
+          GREATER       => if value>temp  {value=1}else{value=0}
+          GREATER_EQUAL => if value>=temp {value=1}else{value=0}
+          _ => ()
+        }
+      }
+
+      value
+    }
     _ => error_number
   }
 }
@@ -254,7 +346,7 @@ fn Excuter::excutePlusMinusExpression(self:Excuter,plusminus_expression:AST)->In
         let temp=self.excuteMulDivExpression(muldiv_expressions[i+1])
         
         match infix_operators[i].t_type{
-          PLUS => value+=temp
+          PLUS  => value+=temp
           MINUS => value-=temp
           _ => ()
         }
@@ -302,7 +394,11 @@ fn Excuter::excuteUnaryExpression(self:Excuter,unary_expression:AST)->Int{
       }
       
       match prefix_operator {
-        Some(t) => match t.t_type {MINUS => value=-value;_=>()}
+        Some(t) => match t.t_type {
+          MINUS => value=-value
+          NOT   => if value==0 {value=1}else{value=0}
+          _=>()
+          }
         None => ()
       }
 
@@ -328,7 +424,7 @@ fn Excuter::excutePrimaryExpression(self:Excuter,primary_expression:AST)->Int{
         }
       }
     }
-    
+
     PrimaryExpressionAST(None,None,Some(value_int)) => value_int
     _ => error_number
   }
