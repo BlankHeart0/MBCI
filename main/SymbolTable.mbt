@@ -77,6 +77,7 @@ struct Function {
   name:String
   body:AST
   parameters:@vec.Vec[Parameter]
+  line:Int
 }
 
 struct FunctionTable {
