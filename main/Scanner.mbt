@@ -65,6 +65,8 @@ fn Scanner::scan(self:Scanner)->@vec.Vec[Token]{
       ' '|'\r'|'\t' => continue
       '\n' => self.line+=1
       
+      //String
+      '"' => addToken(self.scanString())
       //Number
        _  => if isDigit(c){addToken(self.scanNumber())}
       //Identifier and Keyword
@@ -78,6 +80,25 @@ fn Scanner::scan(self:Scanner)->@vec.Vec[Token]{
   addToken(CODE_EOF)
 
   tokens
+}
+
+fn Scanner::scanString(self:Scanner)->TokenType{
+  let mut value_str=""
+  
+  while not(self.isAtEnd())&&self.peek1()!='\n'&&self.peek1()!='"'{
+    let mut c=self.advance()
+    if c=='\\'{
+      if self.mattch('n'){c='\n'}
+      else if self.mattch('r'){c='\r'}
+      else if self.mattch('t'){c='\t'}
+      else if self.mattch('b'){c='\b'}
+    }
+    value_str+=c.to_string()
+  }
+
+  if not(self.mattch('"')){self.scanError("Incomplete string")}
+  
+  CONSTANT_STR(value_str)
 }
 
 fn Scanner::scanNumber(self:Scanner)->TokenType{

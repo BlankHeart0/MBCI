@@ -63,8 +63,9 @@ fn interpret(program_name:String,source:String)->Unit{
 }
 
 fn main {
-  interpret("scope",@test.scope)
-  interpret("expression",@test.expression)
+  //interpret("hello",@test.hello)
+  //interpret("add",@test.add)
+  //interpret("scope",@test.scope)
+  //interpret("prime",@test.prime)
   interpret("fibonacci",@test.fib)
-  interpret("add",@test.add)
 }

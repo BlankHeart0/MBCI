@@ -1,7 +1,7 @@
 enum TokenType{
   //Keyword
   INT; VOID
-  PRINT
+  PRINTF
   IF; ELSE
   WHILE; DO; FOR
   CONTINUE; BREAK
@@ -23,6 +23,7 @@ enum TokenType{
 
   //Constant
   CONSTANT_INT(Int)
+  CONSTANT_STR(String)
 
   //Identifier
 	IDENTIFIER
@@ -33,7 +34,7 @@ enum TokenType{
 let keywordMap:@hashmap.HashMap[String,TokenType]=
   @hashmap.HashMap::[
     ("int",INT),("void",VOID),
-    ("print",PRINT),
+    ("printf",PRINTF),
     ("if",IF),("else",ELSE),
     ("while",WHILE),("do",DO),("for",FOR),
     ("continue",CONTINUE),("break",BREAK),
@@ -50,7 +51,7 @@ fn getTokenStr(self:TokenType)->String{
   match self{
   //Keyword
   INT => "INT"; VOID=>"VOID"
-  PRINT => "PRINT"
+  PRINTF => "PRINTF"
   IF => "IF"; ELSE => "ELSE"
   WHILE => "WHILE"; DO => "DO"; FOR => "FOR"
   CONTINUE => "CONTINUE"; BREAK => "BREAK"
@@ -72,6 +73,7 @@ fn getTokenStr(self:TokenType)->String{
 
   //Constant
   CONSTANT_INT(value_int) => "CONSTANT_INT\t"+value_int.to_string()
+  CONSTANT_STR(value_str) => "CONSTANT_STR\t"+value_str
 
   //Identifier
 	IDENTIFIER => "IDENTIFIER"
@@ -84,7 +86,7 @@ fn isSameTokenType(token1type:TokenType,token2type:TokenType)->Bool{
   match token1type{
     INT => match token2type{INT=>true;_=>false}
     VOID => match token2type{VOID=>true;_=>false}
-    PRINT => match token2type{PRINT=>true;_=>false}
+    PRINTF => match token2type{PRINTF=>true;_=>false}
     IF => match token2type{IF=>true;_=>false}
     ELSE => match token2type{ELSE=>true;_=>false}
     WHILE => match token2type{WHILE=>true;_=>false}
@@ -117,6 +119,7 @@ fn isSameTokenType(token1type:TokenType,token2type:TokenType)->Bool{
     AND => match token2type{AND=>true;_=>false}
     OR => match token2type{OR=>true;_=>false}
     CONSTANT_INT(_) => match token2type{CONSTANT_INT(_)=>true;_=>false}
+    CONSTANT_STR(_) => match token2type{CONSTANT_STR(_)=>true;_=>false}
     IDENTIFIER => match token2type{IDENTIFIER=>true;_=>false}
     CODE_EOF => match token2type{CODE_EOF=>true;_=>false}
   }

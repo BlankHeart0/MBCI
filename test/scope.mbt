@@ -1,18 +1,23 @@
 pub let scope=
+#|int a=0;
+#|
 #|int main() {
-#|  int a=0;
-#|  int b;
-#|  print a; //0
+#|  printf("a0 = %d\n",a);      //0
+#|
+#|  int a=1;
+#|  printf("a1 = %d\n",a);      //1
+#| 
 #|  {
-#|    int a=-100;
-#|    print a; //-100
-#|    print b; //0
+#|    int a=2;
+#|    printf("a2 = %d\n",a);    //2
 #|    {
 #|      a=a+1; 
-#|      print a; //-99
+#|      printf("a2 = %d\n",a);  //3
+#|
 #|      int a=999;
-#|      print a; //999
+#|      printf("a3 = %d\n",a);  //999
 #|    }
 #|  }
-#|  print a; //0
+#|
+#|  printf("a1 = %d\n",a);      //1
 #|}

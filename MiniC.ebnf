@@ -11,14 +11,14 @@
 
 # Statement
 <Statement> ::= <LocalVariable_Definition> | <Compound_Statement> | <Assign_Statement> | <If_Statement>
-                <While_Statement> | <Return_Statement> | <Print_Statement> | <Expression_Statement>
+                <While_Statement> | <Return_Statement> | <Printf_Statement> | <Expression_Statement>
 <Compound_Statement> ::= "{"{<Statement>}"}"
 
 <Assign_Statement> ::= IDENTIFIER "=" <Expression> ";"
-<If_Statement> ::= IF"("<Expression>")"<Statement>[ELSE<Statement>]
-<While_Statement> ::= WHILE"("<Expression>")"<Statement>
+<If_Statement> ::= IF "("<Expression>")"<Statement>[ELSE<Statement>]
+<While_Statement> ::= WHILE "("<Expression>")"<Statement>
 <Return_Statement> ::= RETURN [<Expression>] ";"
-<Print_Statement> ::= PRINT <Expression> ";"
+<Printf_Statement> ::= PRINTF "(" CONSTANT_STR {","<Expression>} ")" ";"
 <Expression_Statement> ::= <Expression> ";"
 
 # Expression

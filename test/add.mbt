@@ -5,19 +5,19 @@ pub let add=
 #|
 #|int x=-10;
 #|
-#|void addx_one(){
+#|void x_increment(){
 #|  x=x+1;
 #|}
 #|
 #|int main()
 #|{
-#|  print add(add(1,2),add(3,4));
+#|  printf("1+2+3+4= %d\n",add(add(1,2),add(3,4)));
 #|  
 #|  int i=0;
 #|  
 #|  while(i<3){
-#|    addx_one();
-#|    print x;  
+#|    x_increment();
+#|    printf("x = %d\n",x);
 #|    i=i+1;
 #|  }  
 #|

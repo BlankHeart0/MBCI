@@ -158,7 +158,7 @@ fn Parser::parseStatement(self:Parser)->Result[AST,Unit]{
     else if self.peek1(IF)        {self.parseIfStatement()?}
     else if self.peek1(WHILE)     {self.parseWhileStatement()?}
     else if self.peek1(RETURN)    {self.parseReturnStatement()?}
-    else if self.peek1(PRINT)     {self.parsePrintStatement()?}
+    else if self.peek1(PRINTF)    {self.parsePrintfStatement()?}
     else                          {self.parseExpressionStatement()?}
 
   Ok(StatementAST(x_statement))
@@ -271,17 +271,37 @@ fn Parser::parseReturnStatement(self:Parser)->Result[AST,Unit]{
   else {self.parseError("Keyword 'return' loss");Err(())}
 }
 
+fn Parser::parsePrintfStatement(self:Parser)->Result[AST,Unit]{
+  whoAmI("parsePrintfStatement")
 
-fn Parser::parsePrintStatement(self:Parser)->Result[AST,Unit]{
-  whoAmI("parsePrintStatement")
+  if self.mattch(PRINTF){
+    if self.mattch(LEFT_PAREN){
+      match self.consuming().t_type{
+        CONSTANT_STR(_) => {
+          self.consume()
+          let constant_str=self.consumed()
 
-  if self.mattch(PRINT){
-    let expression=self.parseExpression()?
-    self.mattchSemicolon()
+          let expressions=@vec.Vec::new()
+          while self.mattch(COMMA){
+            expressions.push(self.parseExpression()?)
+          }
 
-    Ok(PrintStatementAST(expression))
+          if self.mattch(RIGHT_PAREN){
+            self.mattchSemicolon()
+            Ok(PrintfStatementAST(constant_str,expressions))
+          }
+          else {self.parseError("Right paren ')' loss");Err(())}
+        }
+
+        _ => {
+          self.parseError("Printf's format string loss")
+          Err(())
+        }
+      }
+    }
+    else {self.parseError("Left paren '(' loss");Err(())}
   }
-  else {self.parseError("Keyword 'print' loss");Err(())}
+  else {self.parseError("Keyword 'printf' loss");Err(())}
 }
 
 fn Parser::parseExpressionStatement(self:Parser)->Result[AST,Unit]{
@@ -292,6 +312,7 @@ fn Parser::parseExpressionStatement(self:Parser)->Result[AST,Unit]{
 
   Ok(ExpressionStatementAST(expression))
 }
+
 
 
 // Expression

@@ -15,7 +15,7 @@ enum AST{
   IfStatementAST(AST,AST,Option[AST])
   WhileStatementAST(AST,AST)
   ReturnStatementAST(Option[AST])
-  PrintStatementAST(AST)
+  PrintfStatementAST(Token,@vec.Vec[AST])
   ExpressionStatementAST(AST)
 
   // Expression
@@ -136,9 +136,10 @@ fn AST::astPrint(self:AST,depth:Int)->Unit{
       }
     }
 
-    PrintStatementAST(expression) => {
-      println("PrintStatementAST")
-      expression.astPrint(depth+1)
+    PrintfStatementAST(constant_str,expressions) => {
+      print("PrintfStatementAST")
+      println(" format_string:"+constant_str.lexeme)
+      expressions.iter(childrenPrint)
     }
 
     ExpressionStatementAST(expression) => {

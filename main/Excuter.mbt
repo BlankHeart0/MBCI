@@ -188,7 +188,7 @@ fn Excuter::excuteStatement(self:Excuter,statement:AST)->Unit{
         IfStatementAST(_)             => self.excuteIfStatement(x_statement)
         WhileStatementAST(_)          => self.excuteWhileStatement(x_statement)
         ReturnStatementAST(_)         => self.excuteRetuerStatement(x_statement)
-        PrintStatementAST(_)          => self.excutePrintStatement(x_statement)
+        PrintfStatementAST(_)          => self.excutePrintfStatement(x_statement)
         ExpressionStatementAST(_)     => self.excuteExpressionStatement(x_statement)
         _ => ()
       }
@@ -269,7 +269,7 @@ fn Excuter::excuteWhileStatement(self:Excuter,while_statement:AST)->Unit{
 
   match while_statement{
     WhileStatementAST(expression,statement) => {
-      while self.excuteExpression(expression)!=0 && not(self.is_error){
+      while self.excuteExpression(expression)!=0 && not(self.is_error) && not(self.is_returned){
         self.excuteStatement(statement)
       }
     }
@@ -293,13 +293,48 @@ fn Excuter::excuteRetuerStatement(self:Excuter,return_statement:AST)->Unit{
   self.is_returned=true
 }
 
-fn Excuter::excutePrintStatement(self:Excuter,print_statement:AST)->Unit{
-  whoAmI("excutePrintStatement")
+fn Excuter::excutePrintfStatement(self:Excuter,print_statement:AST)->Unit{
+  whoAmI("excutePrintfStatement")
 
   match print_statement {
-    PrintStatementAST(expression) => {
-      let expression_value=self.excuteExpression(expression)
-      if not(self.is_error){println(expression_value)}
+    PrintfStatementAST(constant_str,expressions) => {
+      self.line=constant_str.line
+
+      match constant_str.t_type{
+        CONSTANT_STR(value_str) => {
+          let mut d_number=0
+          let str_ary=value_str.to_array()
+          for i=0;i<str_ary.length()-1;i=i+1{
+            if str_ary[i]=='%'&&str_ary[i+1]=='d'{
+              d_number+=1
+            }
+          }
+          if d_number!=expressions.length(){
+            self.otherError("Printf's %d and expression arguments number is not equal")
+            return
+          }
+
+          let mut combine_str=""
+          let mut i=0
+          let mut j=0
+          while i<str_ary.length(){
+            if i<str_ary.length()-1&&str_ary[i]=='%'&&str_ary[i+1]=='d'{
+              let expression_value=self.excuteExpression(expressions[j])
+              if self.is_error{return}
+              combine_str+=expression_value.to_string()
+              j+=1
+              i+=2
+            }
+            else{
+              combine_str+=str_ary[i].to_string()
+              i+=1
+            }
+          }
+
+          print(combine_str)
+        }
+        _ => ()
+      }
     }
     _ => ()
   }

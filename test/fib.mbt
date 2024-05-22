@@ -15,9 +15,9 @@ pub let fib =
   #|int main()
   #|{
   #|  int i=0;
-  #|  while(i<10)
+  #|  while(i<=20)
   #|  {
-  #|    print fib(i);
+  #|    printf("fib(%d)\t= %d\n",i,fib(i));
   #|    i=i+1;
   #|  }
   #|
