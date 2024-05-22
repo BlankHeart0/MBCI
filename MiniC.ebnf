@@ -1,13 +1,13 @@
 # Mini C EBNF Grammar <@BlankHeart---2024>
 
 # Translation Unit
-<Translation_Unit> ::= {<Function_Definition>} CODE_EOF
+<Translation_Unit> ::= {<Function_Definition> | <GlobalVariable_Definition>} CODE_EOF
 
 # Definition
 <Function_Definition> ::= (VOID|INT) IDENTIFIER "(" [<Parameter>{","<Parameter>}] ")" <Compound_Statement>
 <Parameter> ::= INT IDENTIFIER
-
-<LocalVariable_Definition> ::= (INT) IDENTIFIER ["="<Expression>]";"
+<GlobalVariable_Definition> ::= INT IDENTIFIER ["="["-"]CONSTANT_INT]";"
+<LocalVariable_Definition> ::= INT IDENTIFIER ["="<Expression>]";"
 
 # Statement
 <Statement> ::= <LocalVariable_Definition> | <Compound_Statement> | <Assign_Statement> | <If_Statement>

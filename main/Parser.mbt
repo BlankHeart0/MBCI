@@ -12,13 +12,16 @@ struct Parser {
 fn Parser::parseTranslationUnit(self:Parser)->Result[AST,Unit]{
   whoAmI("parseTranslationUnit")
 
-  let function_definitions=@vec.Vec::new()
+  let definitions=@vec.Vec::new()
   
-  while not(self.isAtEnd()||self.isAtEnd()){
-    function_definitions.push(self.parseFunctionDefinition()?)
+  while not(self.isAtEnd()){
+    if self.peekN(LEFT_PAREN,3){
+      definitions.push(self.parseFunctionDefinition()?)
+    }
+    else {definitions.push(self.parseGlobalVariableDefinition()?)}
   }
 
-  Ok(TranslationUnitAST(function_definitions))
+  Ok(TranslationUnitAST(definitions))
 }
 
 
@@ -77,6 +80,44 @@ fn Parser::parseParameter(self:Parser)->Result[AST,Unit]{
   else {self.parseError("Parameter type loss");Err(())}
 }
 
+fn Parser::parseGlobalVariableDefinition(self:Parser)->Result[AST,Unit]{
+  whoAmI("parseGlobalVariableDefinition")
+
+  if self.mattch(INT){
+    let data_type=self.consumed()
+
+    if self.mattch(IDENTIFIER){
+      let variable_name=self.consumed()
+      
+      if self.mattch(ASSIGN){
+        let negative=self.mattch(MINUS)
+        
+        match self.consuming().t_type{
+          CONSTANT_INT(value_int) => {
+            self.consume()
+            self.mattchSemicolon()
+            if negative{
+              Ok(GlobalVariableDefinitionAST(data_type,variable_name,Some(-value_int)))
+            }
+            else {Ok(GlobalVariableDefinitionAST(data_type,variable_name,Some(value_int)))}
+          }
+          _ => {
+            self.parseError("Global variable only can be initialized by constant")
+            Err(())
+          }
+        }
+      }
+      else{
+        self.mattchSemicolon()
+
+        Ok(GlobalVariableDefinitionAST(data_type,variable_name,None))
+      }
+    }
+    else {self.parseError("Variable name loss");Err(())}
+  }
+  else {self.parseError("Variable type loss");Err(())}
+}
+
 fn Parser::parseLocalVariableDefinition(self:Parser)->Result[AST,Unit]{
   whoAmI("parseLocalVariableDefinition")
 
@@ -102,6 +143,7 @@ fn Parser::parseLocalVariableDefinition(self:Parser)->Result[AST,Unit]{
   }
   else {self.parseError("Variable type loss");Err(())}
 }
+
 
 
 // Statement

@@ -43,13 +43,14 @@ fn interpret(program_name:String,source:String)->Unit{
       let excuter:Excuter={
         ast:ast,
         functable:FunctionTable::new(),
+        global_vartable:@hashmap.HashMap::new(),
         vartable_stack:@vec.Vec::new(),
         return_value:error_number,
         is_returned:false,
         line:0,
         is_error:false
       }
-      excuter.excute()
+     excuter.excute()
 
       if excuter.is_error{
         println("---------------- Error! ----------------->")
@@ -63,7 +64,7 @@ fn interpret(program_name:String,source:String)->Unit{
 
 fn main {
   interpret("scope",@test.scope)
-  interpret("add",@test.add)
   interpret("expression",@test.expression)
   interpret("fibonacci",@test.fib)
+  interpret("add",@test.add)
 }

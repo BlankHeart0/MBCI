@@ -4,7 +4,8 @@ enum AST{
 
   // Definition
   FunctionDefinitionAST(Token,Token,@vec.Vec[AST],AST)
-  ParameterAST(Token,Token)
+  ParameterAST(Token,Token)  
+  GlobalVariableDefinitionAST(Token,Token,Option[Int])
   LocalVariableDefinitionAST(Token,Token,Option[AST])
 
   // Statement
@@ -40,9 +41,9 @@ fn AST::astPrint(self:AST,depth:Int)->Unit{
 
   match self {
     // Translation Unit
-    TranslationUnitAST(function_definitions) => {
+    TranslationUnitAST(definitions) => {
       println("TranslationUnitAST")
-      function_definitions.iter(childrenPrint)
+      definitions.iter(childrenPrint)
     }
       
     // Definition
@@ -60,6 +61,19 @@ fn AST::astPrint(self:AST,depth:Int)->Unit{
       println(" parameter_name:"+parameter_name.lexeme)
     }
 
+    GlobalVariableDefinitionAST(data_type,variable_name,constantInt_option) => {
+      print("GlobalVariableDefinitionAST")
+      print(" data_type:"+data_type.lexeme)
+      println(" variable_name:"+variable_name.lexeme)
+      match constantInt_option {
+        Some(value_int) => {
+          deepPrintln(" INITIALIZE =")
+          deepPrintln(value_int.to_string())
+        }
+        None => ()
+      }
+    }
+    
     LocalVariableDefinitionAST(data_type,variable_name,expression_option) => {
       print("LocalVariableDefinitionAST")
       print(" data_type:"+data_type.lexeme)

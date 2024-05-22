@@ -1,6 +1,7 @@
 struct Excuter {
   ast:AST
   functable:FunctionTable
+  global_vartable:@hashmap.HashMap[String,Variable]
   vartable_stack:@vec.Vec[VariableTable]
   mut is_returned:Bool
   mut return_value:Int
@@ -53,13 +54,16 @@ fn Excuter::loadTranslationUnit(self:Excuter)->Unit{
   whoAmI("loadTranslationUnit")
 
   match self.ast {
-    TranslationUnitAST(function_definitions) => 
-      function_definitions.iter(
-        fn(function_definition){
-          self.loadFunctionDefinition(function_definition)
+    TranslationUnitAST(definitions) => 
+      definitions.iter(
+        fn(definition){
+          match definition{
+            FunctionDefinitionAST(_) => self.loadFunctionDefinition(definition)
+            GlobalVariableDefinitionAST(_) => self.excuteGlobalVariableDefinition(definition)
+            _ => ()
+          }
         }
       )
-    
     _=> ()
   }
 }
@@ -108,6 +112,35 @@ fn Excuter::loadParameter(self:Excuter,parameter:AST)->Parameter{
   }
 }
 
+fn Excuter::excuteGlobalVariableDefinition(self:Excuter,globalvar_definition:AST)->Unit{
+  whoAmI("excuteGlobalVariableDefinition")
+
+  match globalvar_definition{
+    GlobalVariableDefinitionAST(data_type,variable_name,constantInt_option) => {
+      self.line=variable_name.line
+
+      let initial_value=match constantInt_option{
+        Some(value_int) => value_int
+        None => 0
+      }
+
+      let new_variable:Variable={
+        data_type:match data_type.t_type {INT=>D_Int},
+        name:variable_name.lexeme,
+        value:initial_value
+      }
+
+      if self.global_vartable.contains(new_variable.name){
+        self.symbolError("The variable: "+variable_name.lexeme+" is redefined")
+      }
+      else {
+        self.global_vartable.set(variable_name.lexeme,new_variable)
+      }
+    }
+    _ => ()
+  }
+}
+
 fn Excuter::excuteLocalVariableDefinition(self:Excuter,localvar_definition:AST)->Unit{
   whoAmI("excuteLocalVariableDefinition")
 
@@ -115,9 +148,14 @@ fn Excuter::excuteLocalVariableDefinition(self:Excuter,localvar_definition:AST)-
     LocalVariableDefinitionAST(data_type,variable_name,expression_option) => {
       self.line=variable_name.line
 
-      let initial_value=match expression_option{
-        Some(expression) => self.excuteExpression(expression)
-        None => 0
+      let mut initial_value=0
+      match expression_option{
+        Some(expression) => {
+          let expression_value=self.excuteExpression(expression)
+          if self.is_error {return}
+          initial_value=expression_value
+        }
+        None => ()
       }
       
       let new_variable:Variable={
@@ -186,9 +224,13 @@ fn Excuter::excuteAssignStatement(self:Excuter,assign_statement:AST)->Unit{
       self.line=variable.line
 
       let expression_value=self.excuteExpression(expression)
+      if self.is_error {return}
 
       if not(self.vartable_stack[self.vartable_stack.length()-1].set(variable.lexeme,expression_value)){
-        self.symbolError("The variable: "+variable.lexeme+" is undefined")
+        match self.global_vartable.get(variable.lexeme){
+          Some(variable) => variable.value=expression_value
+          None => self.symbolError("The variable: "+variable.lexeme+" is undefined")
+        }
       }
     }
     _ => ()
@@ -201,14 +243,20 @@ fn Excuter::excuteIfStatement(self:Excuter,if_statement:AST)->Unit{
 
   match if_statement{
     IfStatementAST(expression,statement_true,Some(statement_false)) => {
-      if self.excuteExpression(expression)!=0{
+      let expression_value=self.excuteExpression(expression)
+      if self.is_error {return}
+
+      if expression_value!=0{
         self.excuteStatement(statement_true)
       }
       else {self.excuteStatement(statement_false)}
     }
 
     IfStatementAST(expression,statement_true,None) => {
-      if self.excuteExpression(expression)!=0{
+      let expression_value=self.excuteExpression(expression)
+      if self.is_error {return}
+
+      if expression_value!=0{
         self.excuteStatement(statement_true)
       }
     }
@@ -221,7 +269,7 @@ fn Excuter::excuteWhileStatement(self:Excuter,while_statement:AST)->Unit{
 
   match while_statement{
     WhileStatementAST(expression,statement) => {
-      while self.excuteExpression(expression)!=0 {
+      while self.excuteExpression(expression)!=0 && not(self.is_error){
         self.excuteStatement(statement)
       }
     }
@@ -454,8 +502,13 @@ fn Excuter::excutePrimaryExpression(self:Excuter,primary_expression:AST)->Int{
       match self.vartable_stack[self.vartable_stack.length()-1].get(variable.lexeme){
         Ok(value) => value
         Err(_) => {
-          self.symbolError("The variable: "+variable.lexeme+" is undefined")
-          error_number
+          match self.global_vartable.get(variable.lexeme){
+            Some(variable) => variable.value
+            None => {
+              self.symbolError("The variable: "+variable.lexeme+" is undefined")
+              error_number
+            }
+          }
         }
       }
     }
