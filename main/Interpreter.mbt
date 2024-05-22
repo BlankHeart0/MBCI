@@ -51,7 +51,10 @@ fn interpret(program_name:String,source:String)->Unit{
       }
       excuter.excute()
 
-      println("----------------- Done ------------------>")
+      if excuter.is_error{
+        println("---------------- Error! ----------------->")
+      }
+      else {println("----------------- Done ------------------>")}
       println("")
     }
     Err(_) => ()
@@ -62,4 +65,5 @@ fn main {
   interpret("scope",@test.scope)
   interpret("add",@test.add)
   interpret("expression",@test.expression)
+  interpret("fibonacci",@test.fib)
 }

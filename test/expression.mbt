@@ -1,7 +1,9 @@
 pub let expression =
   #|int add(){
-  #|  2+3+4+5;
+  #|  print 2+3+4+5;
   #|  print 0;
+  #|
+  #|return -1;
   #|}
   #|
   #|int main(){
@@ -19,6 +21,8 @@ pub let expression =
   #|  int a=10;
   #|  print -a>0;
   #|  print a!=100&&-1>-2;
+  #|  print 123;
+  #|  print add();
   #|  
   #|  int b=20;
   #|  print a<0||b<0||b>b-a;

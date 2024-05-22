@@ -109,12 +109,15 @@ fn Parser::parseStatement(self:Parser)->Result[AST,Unit]{
   whoAmI("parseStatement")
 
   let x_statement:AST=
-    if self.peek1(INT) {self.parseLocalVariableDefinition()?}
+    if self.peek1(INT)            {self.parseLocalVariableDefinition()?}
     else if self.peek1(LEFT_BRACE){self.parseCompoundStatement()?}
-    else if self.peek1(IDENTIFIER)&& self.peekN(ASSIGN,2){self.parseAssignStatement()?}
-    else if self.peek1(RETURN){self.parseReturnStatement()?}
-    else if self.peek1(PRINT){self.parsePrintStatement()?}
-    else {self.parseExpressionStatement()?}
+    else if self.peek1(IDENTIFIER)&&
+            self.peekN(ASSIGN,2)  {self.parseAssignStatement()?}
+    else if self.peek1(IF)        {self.parseIfStatement()?}
+    else if self.peek1(WHILE)     {self.parseWhileStatement()?}
+    else if self.peek1(RETURN)    {self.parseReturnStatement()?}
+    else if self.peek1(PRINT)     {self.parsePrintStatement()?}
+    else                          {self.parseExpressionStatement()?}
 
   Ok(StatementAST(x_statement))
 }
@@ -152,6 +155,49 @@ fn Parser::parseAssignStatement(self:Parser)->Result[AST,Unit]{
   }
   else {self.parseError("Variable name loss");Err(())}
 
+}
+
+fn Parser::parseIfStatement(self:Parser)->Result[AST,Unit]{
+  whoAmI("parseIfStatement")
+  
+  if self.mattch(IF){
+    if self.mattch(LEFT_PAREN){
+      let expression=self.parseExpression()?
+
+      if self.mattch(RIGHT_PAREN){
+        let statement_true=self.parseStatement()?
+
+        if self.mattch(ELSE){
+          let statement_false=self.parseStatement()?
+
+          Ok(IfStatementAST(expression,statement_true,Some(statement_false)))
+        }
+        else{Ok(IfStatementAST(expression,statement_true,None))}
+      } 
+      else {self.parseError("Right paren ')' loss");Err(())}
+    }
+    else {self.parseError("Left paren '(' loss");Err(())}
+  }
+  else {self.parseError("Keyword 'if' loss");Err(())}
+}
+
+fn Parser::parseWhileStatement(self:Parser)->Result[AST,Unit]{
+  whoAmI("parseWhileStatement")
+
+  if self.mattch(WHILE){
+    if self.mattch(LEFT_PAREN){
+      let expression=self.parseExpression()?
+      
+      if self.mattch(RIGHT_PAREN){
+        let statement=self.parseStatement()?
+
+        Ok(WhileStatementAST(expression,statement))
+      }
+      else {self.parseError("Right paren ')' loss");Err(())}
+    }
+    else {self.parseError("Left paren '(' loss");Err(())}
+  }
+  else {self.parseError("Keyword 'while' loss");Err(())}
 }
 
 fn Parser::parseReturnStatement(self:Parser)->Result[AST,Unit]{

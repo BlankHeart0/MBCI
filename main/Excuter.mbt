@@ -145,11 +145,13 @@ fn Excuter::excuteStatement(self:Excuter,statement:AST)->Unit{
     StatementAST(x_statement) => 
       match x_statement {
         LocalVariableDefinitionAST(_) => self.excuteLocalVariableDefinition(x_statement)
-        CompoundStatementAST(_) => self.excuteCompoundStatement(x_statement,false)
-        AssignStatementAST(_) => self.excuteAssignStatement(x_statement)
-        ReturnStatementAST(_) => self.excuteRetuerStatement(x_statement)
-        PrintStatementAST(_) => self.excutePrintStatement(x_statement)
-        ExpressionStatementAST(_) => self.excuteExpressionStatement(x_statement)
+        CompoundStatementAST(_)       => self.excuteCompoundStatement(x_statement,false)
+        AssignStatementAST(_)         => self.excuteAssignStatement(x_statement)
+        IfStatementAST(_)             => self.excuteIfStatement(x_statement)
+        WhileStatementAST(_)          => self.excuteWhileStatement(x_statement)
+        ReturnStatementAST(_)         => self.excuteRetuerStatement(x_statement)
+        PrintStatementAST(_)          => self.excutePrintStatement(x_statement)
+        ExpressionStatementAST(_)     => self.excuteExpressionStatement(x_statement)
         _ => ()
       }
     _ => ()
@@ -192,6 +194,39 @@ fn Excuter::excuteAssignStatement(self:Excuter,assign_statement:AST)->Unit{
     _ => ()
   }
 
+}
+
+fn Excuter::excuteIfStatement(self:Excuter,if_statement:AST)->Unit{
+  whoAmI("excuteIfStatement")
+
+  match if_statement{
+    IfStatementAST(expression,statement_true,Some(statement_false)) => {
+      if self.excuteExpression(expression)!=0{
+        self.excuteStatement(statement_true)
+      }
+      else {self.excuteStatement(statement_false)}
+    }
+
+    IfStatementAST(expression,statement_true,None) => {
+      if self.excuteExpression(expression)!=0{
+        self.excuteStatement(statement_true)
+      }
+    }
+    _ => ()
+  }
+}
+
+fn Excuter::excuteWhileStatement(self:Excuter,while_statement:AST)->Unit{
+  whoAmI("excuteWhileStatement")
+
+  match while_statement{
+    WhileStatementAST(expression,statement) => {
+      while self.excuteExpression(expression)!=0 {
+        self.excuteStatement(statement)
+      }
+    }
+    _ => ()
+  }
 }
 
 fn Excuter::excuteRetuerStatement(self:Excuter,return_statement:AST)->Unit{

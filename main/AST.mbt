@@ -11,6 +11,8 @@ enum AST{
   StatementAST(AST)
   CompoundStatementAST(@vec.Vec[AST])
   AssignStatementAST(Token,AST)
+  IfStatementAST(AST,AST,Option[AST])
+  WhileStatementAST(AST,AST)
   ReturnStatementAST(Option[AST])
   PrintStatementAST(AST)
   ExpressionStatementAST(AST)
@@ -89,6 +91,26 @@ fn AST::astPrint(self:AST,depth:Int)->Unit{
       expression.astPrint(depth+1)
     }
 
+    IfStatementAST(expression,statement_true,statement_option) => {
+      println("IfStatementAST")
+      expression.astPrint(depth+1)
+      deepPrintln("TRUE BRANCH")
+      statement_true.astPrint(depth+1)
+      match statement_option{
+        Some(statement_false) => {
+          deepPrintln("FALSE BRANCH")
+          statement_false.astPrint(depth+1) 
+        }
+        None => ()
+      }
+    }
+    
+    WhileStatementAST(expression,statement) => {
+      println("WhileStatementAST")
+      expression.astPrint(depth+1)
+      statement.astPrint(depth+1)
+    }
+    
     ReturnStatementAST(expression_option) => {
       println("ReturnStatementAST")
       match expression_option {
