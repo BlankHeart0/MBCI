@@ -1,5 +1,17 @@
+fn logo()->Unit{
+  println("")
+  println("MM    MM   BBBB     CCC    IIII")
+  println("M M  M M   B  BB   CC  C    II")
+  println("M  MM  M   BBB     C        II")
+  println("M      M   B  BB   CC  C    II")
+  println("MM    MM   BBBB     CCC    IIII")
+  println("")
+}
+
 fn interpret(program_name:String,source:String)->Unit{
-  println("Program : "+program_name)
+  println("-------------- Program Name ------------->")
+  println(program_name)
+  println("")
 
   //Source code
   println("-------------- Source Code -------------->")
@@ -63,6 +75,8 @@ fn interpret(program_name:String,source:String)->Unit{
 }
 
 fn main {
+  logo()
+
   //interpret("hello",@test.hello)
   //interpret("add",@test.add)
   //interpret("scope",@test.scope)
