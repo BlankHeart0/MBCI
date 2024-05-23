@@ -5,6 +5,8 @@
 ## Support
 Global and local variable. Multiple scopes.
 
+Recursive function call.
+
 Variable data type: int. Function return type: int, void.
 
 Common expressions.
